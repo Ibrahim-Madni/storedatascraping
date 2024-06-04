@@ -56,7 +56,7 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "danube"
+    name = "zara-store"
     homeURL = "https://www.zara.com/ww/en/"
     subcat_item = SubcategoryItem()
     product_api_url = "https://www.zara.com/ww/en/category"
