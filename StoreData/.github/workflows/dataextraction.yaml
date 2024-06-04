@@ -1,0 +1,53 @@
+name: Run Scrapy and Upload to GCS
+
+# on:
+#   schedule:
+#     - cron: '0 6 * * *'
+
+
+#should run on push
+# new stuff possibly
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-scrapy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        spider: [zara-store, Asosstore-spider, localstore-spider]
+
+steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: master
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Create and Activate Virtual Environment
+        run: 
+          python -m venv venv  
+          source venv/bin/activate
+
+    - name: Install dependencies
+      run: 
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pillow
+        pip install scrapy-splash
+
+    - name: Run Scrapy spiders
+      run: scrapy crawl ${{ matrix.spider }} -o ${{ matrix.spider }}.csv -s DOWNLOAD_FAIL_ON_DATALOSS=False
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.spider }}-output
+        path: ${{ matrix.spider }}.csv
