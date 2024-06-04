@@ -1,12 +1,5 @@
 name: Run Scrapy and Upload to GCS
 
-# on:
-#   schedule:
-#     - cron: '0 6 * * *'
-
-
-#should run on push
-# new stuff possibly
 on:
   push:
     branches:
