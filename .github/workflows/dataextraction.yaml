@@ -32,9 +32,9 @@ steps:
         python-version: '3.x'
 
     - name: Create and Activate Virtual Environment
-        run: 
-          python -m venv venv  
-          source venv/bin/activate
+      run: 
+        python -m venv venv  
+        source venv/bin/activate
 
     - name: Install dependencies
       run: 
