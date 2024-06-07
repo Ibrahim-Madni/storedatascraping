@@ -64,7 +64,7 @@ SPIDER_MIDDLEWARES = {
 # # ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
 
 ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
-IMAGES_STORE = 'C:/Users/Ibrahim Madni/Desktop/data/Images'
+# IMAGES_STORE = 'C:/Users/Ibrahim Madni/Desktop/data/Images'
 DOWNLOAD_FAIL_ON_DATALOSS = False
 
 # /home/s/Desktop/store-data-scraping-main/Images
@@ -152,14 +152,14 @@ RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 403]
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+   'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
    "StoreData.middlewares.StoredataSpiderMiddleware": 543,
 }
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
    "StoreData.middlewares.StoredataDownloaderMiddleware": 543,
-   
+   # 'StoreData.middlewares.LogIpMiddleware': 543,
    'scrapy_splash.SplashCookiesMiddleware': 723,
    'scrapy_splash.SplashMiddleware': 725,
    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
