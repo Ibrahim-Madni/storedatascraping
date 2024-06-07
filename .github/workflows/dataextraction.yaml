@@ -27,13 +27,9 @@ jobs:
       - name: Create and Activate Virtual Environment
         run: |
           cd ./StoreData
-          echo "here1"
           python -m venv venv  
-          echo "here2"
           ls ./venv
-          ls ./venv/Scripts
-          source venv/Scripts/activate
-          ps aux | grep python
+          source venv/bin/activate
 
       - name: Install dependencies
         run: | 
