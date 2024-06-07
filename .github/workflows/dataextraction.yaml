@@ -29,6 +29,7 @@ jobs:
           cd ./StoreData
           python -m venv venv  
           source venv/Scripts/activate
+          echo $?
 
       - name: Install dependencies
         run: | 
