@@ -30,6 +30,7 @@ jobs:
           echo "here1"
           python -m venv venv  
           echo "here2"
+          ls
           source venv/Scripts/activate
           ps aux | grep python
 
