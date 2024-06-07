@@ -3,7 +3,7 @@ name: Run Scrapy and Upload to GCS
 on:
   push:
     branches:
-      - main
+      - Data_Scraping_Pipeline
 
 jobs:
   run-scrapy:
