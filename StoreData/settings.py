@@ -63,7 +63,7 @@ SPIDER_MIDDLEWARES = {
 # # }
 # # ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
 
-ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
+# ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
 # IMAGES_STORE = 'C:/Users/Ibrahim Madni/Desktop/data/Images'
 DOWNLOAD_FAIL_ON_DATALOSS = False
 
