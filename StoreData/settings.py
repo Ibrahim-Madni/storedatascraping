@@ -64,7 +64,8 @@ SPIDER_MIDDLEWARES = {
 # # ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
 
 ITEM_PIPELINES = {'StoreData.custom_pipelines.CustomImagesPipeline': 1}
-IMAGES_STORE = 'C:/Users/Ibrahim Madni/Desktop/data/Images'
+# C:\Users\Felicia\Desktop\storedatascrape\storedatascraping\StoreData\images
+IMAGES_STORE = 'C:/Users/Felicia/Desktop/storedatascrape/storedatascraping/StoreData/images'
 DOWNLOAD_FAIL_ON_DATALOSS = False
 
 # /home/s/Desktop/store-data-scraping-main/Images
@@ -141,6 +142,7 @@ CONCURRENT_REQUESTS_PER_IP = 16
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
 # Splash Server Endpoint
+PUPPETEER_SERVICE_URL = 'http://localhost:3000'
 SPLASH_URL = 'http://localhost:8050'
 # Override the default request headers:
 #DEFAULT_REQUEST_HEADERS = {
@@ -159,7 +161,7 @@ SPIDER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
    "StoreData.middlewares.StoredataDownloaderMiddleware": 543,
-   
+   'scrapypuppeteer.middleware.PuppeteerServiceDownloaderMiddleware': 1042,
    'scrapy_splash.SplashCookiesMiddleware': 723,
    'scrapy_splash.SplashMiddleware': 725,
    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,

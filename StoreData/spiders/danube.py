@@ -380,6 +380,7 @@ class DataStoreSpider(scrapy.Spider):
             return None
 
     def custom_Request_level_3(self, response):
+        # print(response.url)
         product_item = ProductItem()
         categoryname = response.meta['categoryName']
         SubcategoryName = response.meta['subcategoryname']
@@ -393,6 +394,8 @@ class DataStoreSpider(scrapy.Spider):
         json_str = response.body.decode('utf-8')
         start_index = json_str.find('<script')
         end_index = json_str.find('</script>') + len('</script>')
+        productsize = []
+        productimages=[]
         if start_index != -1 and end_index != -1:
         # Remove the JavaScript code from the JSON string
             json_str = json_str[:start_index] + json_str[end_index:]
@@ -414,45 +417,60 @@ class DataStoreSpider(scrapy.Spider):
             # with open("product_details.json", 'a') as file:
             #   json.dump(product_details, file, indent=4)
             productnamedetail = json_data.get('product', {})
+            productmetadata = json_data.get('productMetaData', [{}])
+            for productmeta in productmetadata:
+                ItemURL = productmeta.get('url')
+                print(f"following is the Item URL {ItemURL}")
+                break
+                
             if productnamedetail:                                 
                 Itemname = productnamedetail.get('name')
-                product_item['ItemTitle'] = Itemname
+                # product_item['ItemTitle'] = Itemname
                 productgenericdetails =productnamedetail.get('detail',{})
-                itemColour = []
+                # productURLdetails =productURLdetail.get('',{})
+                
+                ItemColour =  []
                 if productgenericdetails:
                     productdetails =  productgenericdetails.get('colors', [{}])
                     
-                    for detail in productdetails:
-                        Itemprice = detail.get('price')
-                        product_item['ItemPrice'] = Itemprice
-                        Itemcolour = detail.get('name')
+                    for detail in productdetails():
+                        # Itemprice = detail.get('price')
+                    #     product_item['ItemPrice'] = Itemprice
+                    #     Itemcolour = detail.get('name')
+                    #     ItemColour.append(Itemcolour)
+                    # print(f"Colours are: {Itemcolour}")
                         # product_item['ItemColour'] = Itemcolour
-                        product_item.setdefault('ItemColour', []).append(Itemcolour)
+                        
                         Itemdescription = detail.get('description')
-                        product_item['ItemDescription'] = Itemdescription
+                        # product_item['ItemDescription'] = Itemdescription
                         sizes = detail.get('sizes', [{}])
                         images = detail.get('mainImgs', [{}])
                         for index, size in enumerate(sizes,start=1):
-                            productsize = size.get('name')
-                            product_item[f'Size{index}'] = productsize
+                            sizeguide = size.get('name')
+                            productsize.append(sizeguide)
+                            # product_item[f'Size{index}'] = productsize
                             
                             # product_item.setdefault('size', []).append(productsize)
                         for image in images:
                             imagekind = image.get('kind')
-                            if(imagekind == "other"):
+                            if(imagekind == "plain"):
                                 ImageURL = image.get('url')
                                 if ImageURL:
-                                    product_item.setdefault('image_urls', []).append(ImageURL)
-                                # print(Itemname)
-                                # print(Itemcolour)
-                                # print(Itemprice)
-                                # print(Itemdescription)
-                                # print(ImageURL)
-                                # print(product_item)
-                                # break
-                    
-                    print(product_item)                        
-                    yield product_item
+                                    productimages.append(ImageURL)
+                        # product_item.setdefault('ItemColour', []).append(Itemcolour)
+            #                     # print(Itemname)
+            #                     # print(Itemcolour)
+            #                     # print(Itemprice)
+            #                     # print(Itemdescription)
+            #                     # print(ImageURL)
+            #                     # print(product_item)
+            #                     # break
+                    yield scrapy.Request(url= ItemURL, callback= self.IndividualPageParse,  meta={ 'categoryName': categoryname,"subcategoryname": SubcategoryName,"itemname": Itemname, "productsize": productsize, "productimages": productimages })
+                            # 'params': params,
+                                # "categoryID": redirectcategoryID
+                                     
+                    # print(product_item)                        
+                    # yield product_item
                         
                         # Itemprice = productdetails.get('price')
                 # Itemdescription = productdetail.get('description')
@@ -534,7 +552,19 @@ class DataStoreSpider(scrapy.Spider):
         #         }
         #     ) 
 
-    
+    def IndividualPageParse(self, response):
+        print(response.url)
+        categoryname = response.meta['categoryName']
+        SubcategoryName = response.meta['subcategoryname']
+        itemname= response.meta['itemname']
+        productsize = response.meta['productsize']
+        productimages = response.meta['productimages']
+
+        print(f"categoryname = {categoryname}")
+        print(f"Subcategoryname = {SubcategoryName}")
+        print(f"Itemname = {itemname}")
+        print(f"product sizes are = {productsize}")
+        print(f"product Images are  = {productimages}")
     def parse_api_response_level_3(self, response):
         json_response = json.loads(response.text)
         category_title = response.meta['category_title']
