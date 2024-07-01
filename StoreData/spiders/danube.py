@@ -231,34 +231,44 @@ class DataStoreSpider(scrapy.Spider):
             # https://www.zara.com/ww/en/satin-shirt-p02248802.html?v1=355842665&v2=2352904&ajax=true
             CategoryID = result.get('id')
             categoryName = result.get('name')
-            print(f"{categoryName} : {CategoryID}")
+            
             
             # https://www.zara.com/ww/en/categories?categoryId=2352684&categorySeoId=1055&ajax=true
-            for facet in result.get('subcategories', [{}]):
-                subcategoryID =facet.get('id')
-                temporarysubcatName = facet.get('name')
-                redirectcategoryID = facet.get('redirectCategoryId')
-                actualsubcategoryName = re.sub(r'\s+', '', temporarysubcatName)
+            if categoryName != "KIDS" and categoryName != "BEAUTY":
+                print(f"{categoryName} : {CategoryID}")
+                for facet in result.get('subcategories', [{}]):
+                    # for collection in facet.get('', [{}]):
+                    collectionID =facet.get('id')
+                    temporarycollection = facet.get('name')
+                    # actualcollection = re.sub(r'\s+', '', temporarycollection)
+                    
+                    if(temporarycollection =="NEW COLLECTION"):
+                        for subcategory in facet.get('subcategories', [{}]):
+                            temporarysubcategory = subcategory.get('name')
+                            print(f"the subcategories are{temporarysubcategory}")
+                            redirectcategoryID = subcategory.get('redirectCategoryId')
+                            seocategoryID = subcategory.get('seo', {}).get('seoCategoryId')
 
-                
 
-                
-                seocategoryID = facet.get('seo', {}).get('seoCategoryId')
-                # print(f"{actualsubcategoryName} : {subcategoryID} , {redirectcategoryID}, {seocategoryID}")
-                if redirectcategoryID and seocategoryID:
-                    productURL = f"{self.product_api_url}/{redirectcategoryID}/products?ajax=true"
-                    yield Request(
-                        url=productURL,
-                        method='GET',
-                        # body=json.dumps(payload),
-                        callback=self.SubcategoryURLParse,
-                        meta={
-                            'categoryName': categoryName,
-                            "subcategoryname": actualsubcategoryName,
-                            # 'params': params,
-                            "categoryID": redirectcategoryID
-                        }         
-                    )
+                    
+
+                    
+                    # seocategoryID = facet.get('seo', {}).get('seoCategoryId')
+                            print(f"{temporarysubcategory} : {redirectcategoryID}, {seocategoryID}")
+                            if redirectcategoryID and seocategoryID:
+                                productURL = f"{self.product_api_url}/{redirectcategoryID}/products?ajax=true"
+                                yield Request(
+                                    url=productURL,
+                                    method='GET',
+                                    # body=json.dumps(payload),
+                                    callback=self.SubcategoryURLParse,
+                                    meta={
+                                        'categoryName': categoryName,
+                                        "subcategoryname": temporarysubcategory,
+                                        # 'params': params,
+                                        "categoryID": redirectcategoryID
+                                    }         
+                                )
                 # print(f"subcategoryName + {actualsubcategoryName}" )
                 # print(f"redirectcategoryid + {redirectcategoryID}" )
                 # print(facet)
@@ -312,6 +322,7 @@ class DataStoreSpider(scrapy.Spider):
 
     #this method send a request to each level2 category to send to get the total pages
     def SubcategoryURLParse(self,response):
+        print(response.url)
         category_title = response.meta.get('categoryName')
         sub_category_title = response.meta.get('subcategoryname')
         categoryId = response.meta.get('categoryID')
@@ -421,6 +432,7 @@ class DataStoreSpider(scrapy.Spider):
             Itemname = ""
             Itemprice = ""
             Itemcolour = ""
+            ItemColour = []
             colourcode = []
             colourcode_set = set()
             productnamedetail = json_data.get('product', {})
@@ -453,18 +465,20 @@ class DataStoreSpider(scrapy.Spider):
                 
                 
                 if productgenericdetails:
-                    productdetails =  productgenericdetails.get('colors', [{}])
+                    productdetails =  productgenericdetails.get('colors', [])
                     
                     for detail in productdetails:
                         # Itemprice = detail.get('price')
                         # product_item['ItemPrice'] = Itemprice
-                    #     Itemcolour = detail.get('name')
-                    #     ItemColour.append(Itemcolour)
+                        # Itemcolour = detail.get('name')
+                        # ItemColour.append(Itemcolour)
+                        # print(ItemColour)
                     # print(f"Colours are: {Itemcolour}")
                         # product_item['ItemColour'] = Itemcolour
                         
                         Itemdescription = detail.get('description')
-                        product_item['ItemDescription'] = Itemdescription
+                        
+                        # product_item['ItemDescription'] = Itemdescription
                         sizes = detail.get('sizes', [{}])
                         images = detail.get('mainImgs', [{}])
                         for index, size in enumerate(sizes,start=1):
@@ -480,7 +494,7 @@ class DataStoreSpider(scrapy.Spider):
                                 if ImageURL:
                                     product_item.setdefault('image_urls', []).append(ImageURL)
                         # product_item.setdefault('ItemColour', []).append(Itemcolour)
-            #                     # print(Itemname)
+                                # print(Itemname)
             #                     # print(Itemcolour)
             #                     # print(Itemprice)
             #                     # print(Itemdescription)
@@ -490,7 +504,7 @@ class DataStoreSpider(scrapy.Spider):
                     # yield SplashRequest(url= ItemURL, callback= self.IndividualPageParse,  meta={ 'categoryName': categoryname,"subcategoryname": SubcategoryName,"itemname": Itemname, "productsize": productsize, "productimages": productimages })
                             # 'params': params,
                                 # "categoryID": redirectcategoryID
-                                     
+                    # print(ItemColour)
                     print(product_item)                        
                     yield product_item
                         
@@ -510,11 +524,11 @@ class DataStoreSpider(scrapy.Spider):
             #         imageset = image.get('set')
             #         if(imageset == 2):
             #             ImageURL = image.get('url')
-            #             print(Itemname)
-            #             print(Itemprice)
-            #             print(Itemdescription)
-            #             print(sizerange)
-            #             print(ImageURL)
+                        # print(Itemname)
+                        # print(Itemprice)
+                        # print(Itemdescription)
+                        # print(sizerange)
+                        # print(ImageURL)
                 
 
             
