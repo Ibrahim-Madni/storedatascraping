@@ -20,7 +20,7 @@ class CustomImagesPipeline(ImagesPipeline):
         # for product in item['ProductItem']:
             # image_url = product['image_urls']
                 print(f"my image url: {image_url}")
-                yield scrapy.Request(image_url )
+                yield scrapy.Request(image_url , meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']})
                 # meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
                 # ,meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
                 # yield scrapy.Request(image_url,meta={'ItemTitle': item['ItemTitle']} )
@@ -53,13 +53,13 @@ class CustomImagesPipeline(ImagesPipeline):
         return super().item_completed(results, item, info)
     def file_path(self, request, response=None, info=None, *, item=None):
         print("Processing item in CustomImagesPipeline")
-        # category = request.meta.get('category_title', 'default_category')
-        # subcategory = request.meta.get('subcategoryTitle', 'default_subcategory')
+        category = request.meta.get('category_title', 'default_category')
+        subcategory = request.meta.get('subcategoryTitle', 'default_subcategory')
         # itemname = request.meta.get('ItemTitle')
         # Construct the filename using category and subcategory
         image_name = os.path.basename(urlparse(request.url).path)
     # Construct the path using category, subcategory, and original filename
-        path = os.path.join("DukkanAventique", image_name)
+        path = os.path.join(category, subcategory,  image_name)
         print(f"Saving to path: {path}")
         return path
         # filename = f"{category}_{subcategory}.jpg"

@@ -99,21 +99,21 @@ class DataStoreSpider(scrapy.Spider):
         return cleaned_url
         # 
     def parse(self, response):
-        self.logger.info(f"Reqeust Cookies : {response.request.cookies}")
-        self.logger.info(f"The headers for the request are  {response.headers}")
-        # parentSelector = "div > ul[data-testid='floornav'] > li"
-        # for li in response.css(parentSelector):
-        #     GenderClothingURL=li.css("a::attr(href)").get()
-        #     GenderClothingName=li.css("a::text").get()
-        #     print(GenderClothingName)
-        #     print(GenderClothingURL)
+        # self.logger.info(f"Reqeust Cookies : {response.request.cookies}")
+        # self.logger.info(f"The headers for the request are  {response.headers}")
+        parentSelector = "div > ul[data-testid='floornav'] > li"
+        for li in response.css(parentSelector):
+            GenderClothingURL=li.css("a::attr(href)").get()
+            GenderClothingName=li.css("a::text").get()
+            print(GenderClothingName)
+            print(GenderClothingURL)
             
-        #     if GenderClothingURL and GenderClothingURL != '#':
-        #         yield  scrapy.Request(url= GenderClothingURL, cookies = self.cookies,  callback= self.parse_menitems ,meta={'CategoryName': GenderClothingName})
+            if GenderClothingURL and GenderClothingURL != '#':
+                yield  scrapy.Request(url= GenderClothingURL, cookies = self.cookies,  callback= self.parse_menitems ,meta={'CategoryName': GenderClothingName})
     
     def parse_menitems(self, response):
         
-       
+        print(response.url)
         lua_script = """
         function main(splash, args)
             local url = args.url  -- This is the ResponseURL you pass as an argument
@@ -132,20 +132,29 @@ class DataStoreSpider(scrapy.Spider):
     
         categoryname = response.meta['CategoryName']
         
-        subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(3) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
+        subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(2) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
         #goes through all the list items and extracts subcategories within the clothing item sublist
         for li in subcategoryNavigation:
             allsubcategorylink = li.css("a::attr(href)").get()
+            # print(allsubcategorylink)
             lowercasecategoryname = categoryname.lower()
             #Comparison parameter
             #this peice of code on Line 187 is used to compare the category name with the endpoint of the extracted subcategory link so we dont have unnecessary subcategoryitems that were within the list that are not relevant to the category
             if lowercasecategoryname == allsubcategorylink.split('/')[3].lower():
+                
                 subcategoryname = li.css("a::text").get()
                 subcategorylink = li.css("a::attr(href)").get()
                 print(subcategoryname)
                 print(subcategorylink)
-                if subcategorylink and subcategorylink != '#':
-                    yield scrapy.Request(url= subcategorylink, cookies = self.cookies, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                match = re.search(r'cid=(\d+)', subcategorylink)
+                if match:
+                    cid_value = match.group(1)
+                    # print(cid_value)
+                    itemsURL = f"https://www.asos.com/api/product/search/v2/categories/{cid_value}?offset=0&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=3000"
+                    # print(itemsURL)
+
+                # if subcategorylink and subcategorylink != '#':
+                    yield scrapy.Request(url= itemsURL, cookies = self.cookies, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
 
     def parse_individualitemdetails(self, response):
         lua_script = """
@@ -175,38 +184,64 @@ class DataStoreSpider(scrapy.Spider):
             return splash:html()
         end
         """
-        print(response.url)
+        # print(response.url)
         category = response.meta['categoryname']
         subcategoryname = response.meta['subcategoryname']
+        json_data = json.loads(response.body)
+        product_data = json_data.get('products', [])
+        for product in product_data:
+            itemname = product.get('name')
+            product_price = product.get('price', {}).get('current', {}).get('text')
+            product_url = product.get('url')
+            actualproduct_url = f"{self.homeURL}/{product_url}"
+            yield scrapy.Request(url= actualproduct_url, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'product_price':product_price,  'subcategoryname': subcategoryname, 'categoryname': category})
+            # print(itemname)
+            # print(product_price_details)
+
+        # print(response.bcdy)
+        # url = response.url
+        # print(url)
+        # response_body = response.body
+        # print(response_body)
+
+        # Define the filename using the URL (optional)
+        # filename = 'Response body text.txt'
+
+        # # Write the response body to a file
+        # with open(filename, 'wb') as f:
+        #     f.write(response_body)
+
+        # self.log(f'Saved file {filename}')
         
         
-        self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
-        ItemSections= "section.listingPage_HfNlp > article"
-        LoadMoreButton = response.css("a[data-auto-id='loadMoreProducts']::attr(href)").get()
-        #product-205597587 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-        #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-        for article in response.css(ItemSections):
-            # itemnames = article.css("a > p.productDescription_sryaw::text").get()
-            #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            itemURL = article.css("a::attr(href)").get()
-            itemname = article.css("div.productInfo_rwyH5 > p.productDescription_sryaw::text").get()
-            #product-206835688 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div
-            #product-206492427 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            #product-205491471 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            # itemimage = article.css("a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img::attr(src)").get()
-            # print(itemimage)
-            # for img in itemimage:
-            #     images = img.css("::attr(src)").get()
-            #     print(images)
-            itemprice = article.css("span.originalPrice_jEWt1 > span.price__B9LP::text").get()
-            print(itemprice)
+        
+        # self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
+        # ItemSections= "section.listingPage_HfNlp > article"
+        # LoadMoreButton = response.css("a[data-auto-id='loadMoreProducts']::attr(href)").get()
+        # #product-205597587 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        # #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        # for article in response.css(ItemSections):
+        #     # itemnames = article.css("a > p.productDescription_sryaw::text").get()
+        #     #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     itemURL = article.css("a::attr(href)").get()
+        #     itemname = article.css("div.productInfo_rwyH5 > p.productDescription_sryaw::text").get()
+        #     #product-206835688 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div
+        #     #product-206492427 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     #product-205491471 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     # itemimage = article.css("a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img::attr(src)").get()
+        #     # print(itemimage)
+        #     # for img in itemimage:
+        #     #     images = img.css("::attr(src)").get()
+        #     #     print(images)
+        #     itemprice = article.css("span.originalPrice_jEWt1 > span.price__B9LP::text").get()
+        #     print(itemprice)
             # print(itemimage)
             # print(itemname)
             
             
             # print(itemURL)
         #     if itemURL:
-        #         yield scrapy.Request(url= itemURL, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})    
+        #             
 
         #     # print(itemnames)
             
@@ -241,21 +276,21 @@ class DataStoreSpider(scrapy.Spider):
         # print(categoryname)
         # print(SubcategoryName)   
         Itemname = response.meta['itemname']
-        # ItemPrice = response.meta['itemprice']
-        product_price= ""
-        product_price_json = None
-        pricecontent  = response.xpath('//script[contains(., "window.asos.pdp.config.stockPriceResponse")]/text()').get()
-        product_price_json_match = re.search(r'window\.asos\.pdp\.config\.stockPriceResponse = ({.*?});', pricecontent)
-        if product_price_json_match:
-            product_price_json = product_price_json_match.group(1)
-            product_price_data = json.loads(product_price_json)
-            product_price = product_price_data.get('productPrice', {}).get('current', {}).get('text')
+        ItemPrice = response.meta['product_price']
+        # product_price= ""
+        # product_price_json = None
+        # pricecontent  = response.xpath('//script[contains(., "window.asos.pdp.config.stockPriceResponse")]/text()').get()
+        # product_price_json_match = re.search(r'window\.asos\.pdp\.config\.stockPriceResponse = ({.*?});', pricecontent)
+        # if product_price_json_match:
+        #     product_price_json = product_price_json_match.group(1)
+        #     product_price_data = json.loads(product_price_json)
+        #     product_price = product_price_data.get('productPrice', {}).get('current', {}).get('text')
             
-        else:
-            # Handle the case where the pattern is not found in pricecontent
-            print("Pattern not found in pricecontent")
+        # else:
+        #     # Handle the case where the pattern is not found in pricecontent
+        #     print("Pattern not found in pricecontent")
         # product_price_json = re.search(r'window\.asos\.pdp\.config\.stockPriceResponse = ({.*?});', pricecontent).group(1)
-        product_item['ItemPrice'] = re.sub(r'\s+', '', product_price)
+        # product_item['ItemPrice'] = re.sub(r'\s+', '', product_price)
         product_item['categoryName'] = categoryname
         product_item['SubcategoryName'] = SubcategoryName
         # try:
@@ -278,6 +313,7 @@ class DataStoreSpider(scrapy.Spider):
         #     # For example, set a default value
         #         product_item['ItemPrice'] = "N/A"
         product_item['ItemTitle'] = Itemname
+        product_item['ItemPrice'] = ItemPrice
         
         ProductDetailContainer = "div.F_yfF > ul > li"
         for index, li in enumerate(response.css(ProductDetailContainer)):
@@ -309,7 +345,7 @@ class DataStoreSpider(scrapy.Spider):
         # Now you can access the product data
         # product_price=product_price_data.get('productPrice', {}).get('current', {}).get('text')
         # print(product_price)
-        
+        ItemColour = []
         productbrandName = product_data.get('brandName')
         product_item['ItemBrand'] = productbrandName
         producttype = product_data.get('productType', {}).get('name')
@@ -329,7 +365,8 @@ class DataStoreSpider(scrapy.Spider):
         #         # Set the metadata value in the item
             product_item[size_key] = re.sub(r'\s+', '', productsize)
             colour = variant.get('colour')
-            product_item['ItemColour'] = re.sub(r'\s+', '', colour)
+            ItemColour.append(colour)
+            product_item['ItemColour'] =  colour
             # print(size)
             # print(colour)
         product_item['image_urls'] = []

@@ -77,10 +77,10 @@ class DataStoreSpider(scrapy.Spider):
         
 
     def start_requests(self):
-        start_urls = ['https://www.farfetch.com/pk/shopping/women/items.aspx']
+        start_urls = ['https://www.farfetch.com/ae/shopping/women/clothing-1/items.aspx']
         for url in start_urls:
             item = StoreItem()
-            yield PuppeteerRequest(url, callback=self.parse)
+            yield SplashRequest(url, callback=self.parse)
     def remove_force_sid(self, url):
     # Splitting URL into base and parameters
         base_url, _, params = url.partition('?')
@@ -108,7 +108,86 @@ class DataStoreSpider(scrapy.Spider):
             self.log(f"Retrying URL:{failure.request.url}")
 
     def parse(self, response):
-        print(response.url)
+        #collapsed-panel-category > div > ul > li:nth-child(1)
+        """
+        function main(splash)
+            -- Go to the URL (replace with your actual URL)
+            assert(splash:go(splash.args.url))
+
+            -- Wait for the page to load (adjust wait time if needed)
+            splash:wait(2)
+
+            -- Select the button using the CSS selector
+            local button = splash:select("#slice-container > div.ltr-1p6ifn1.eg8xtxy3 > div > div.ltr-10pik5s.eg8xtxy2 > button")
+
+            -- Click the button using mouse_click method
+            assert(button:mouse_click())
+
+            -- Optional: Wait for the page to reload after clicking (adjust wait time if needed)
+            splash:wait(2)
+
+            -- Return the rendered HTML (optional)
+            return splash:html()
+        end
+        """
+        # print(response.url)
+        # clothingnavigationitems = "div[data-testid='filterContainer'] > ul > li"
+        # for li in response.css(clothingnavigationitems):
+        #     navigationURL = li.css("a::attr(href)").get()
+        #     navigationnames = li.css("a::text").get()
+        #     print(navigationnames)
+        #     print(navigationURL)
+
+
+        script_elements = response.xpath('//script').extract()
+        for script in script_elements:
+            if 'window.__HYDRATION_STATE__="' in script:
+                # Print the script for debugging
+                # print("Full script content:")
+                # print(script)
+
+                # Remove <script> tags
+                script_content = script.strip('<script>').strip('</script>')
+
+                # Debug: Print the initial part of the script content
+                # print("Initial part of script content:")
+                # print(script_content[:500])  # Print first 500 characters to inspect
+
+                # Find the start and end of the JSON content
+                json_start = script_content.find(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],') + len(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],')
+                json_end = script_content.rfind(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],''')
+                context_radius = 70
+                print(f"Context around json_start ({json_start}):")
+                print(script_content[json_start-context_radius:json_start+context_radius])
+                # print(f"Context around json_end ({json_end}):")
+                # print(script_content[json_end-context_radius:json_end+context_radius])
+
+                print(f"The starting point for the JSON is {json_start}")
+                print(f"The ending point for the JSON is {json_end}")
+                if json_start != -1 and json_end != -1:
+                    print("i AM FINALLY HERE")
+                    # Extract the JSON content ensuring json_end is included
+                    json_content = script_content[json_start:json_end + len(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],')]
+                    
+                    # Clean up the extracted JSON content
+                    json_content = json_content.replace('\\"', '"').replace('\\n', '').replace('\\t', '').replace('\\', '')
+                    json_content = json_content.strip('"')
+                    print(json_content)
+                    # filename = 'farfetch_url_document.html'
+                    # with open(filename, 'w', encoding='utf-8') as f:
+                    #     f.write(json_content)
+                    # self.log(f'Saved HTML content to {filename}')
+                # Extract JSON content if valid indices are found
+                # if json_start != -1 and json_end != -1:
+                    # json_content = script_content[json_start:json_end]
+
+                    # Debug: Print the extracted JSON content
+                      # Print first 500 characters to inspect
+
+                    # Replace escaped characters
+
+                    # Remove leading and trailing quotes if any
+                    
         #slice-header > div:nth-child(1) > nav > div:nth-child(1) > div.ltr-1w6gijd.etawori0 > a:nth-child(1)
         # parentSelector = "a[data-ffref='hd_gender']"
         # for a in response.css(parentSelector):

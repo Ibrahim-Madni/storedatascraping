@@ -478,7 +478,7 @@ class DataStoreSpider(scrapy.Spider):
                         
                         Itemdescription = detail.get('description')
                         
-                        # product_item['ItemDescription'] = Itemdescription
+                        product_item['ItemDescription'] = Itemdescription
                         sizes = detail.get('sizes', [{}])
                         images = detail.get('mainImgs', [{}])
                         for index, size in enumerate(sizes,start=1):
