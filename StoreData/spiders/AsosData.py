@@ -131,7 +131,7 @@ class DataStoreSpider(scrapy.Spider):
         """
     
         categoryname = response.meta['CategoryName']
-        
+        offsetvalue= 0
         subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(2) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
         #goes through all the list items and extracts subcategories within the clothing item sublist
         for li in subcategoryNavigation:
@@ -150,51 +150,101 @@ class DataStoreSpider(scrapy.Spider):
                 if match:
                     cid_value = match.group(1)
                     # print(cid_value)
-                    itemsURL = f"https://www.asos.com/api/product/search/v2/categories/{cid_value}?offset=0&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=3000"
+                    # https://www.asos.com/api/product/search/v2/curations/8799?offset=0&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=72&tst-category-curated-version=1
+                    itemsURL = f"https://www.asos.com/api/product/search/v2/categories/{cid_value}?offset=0&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
                     # print(itemsURL)
 
                 # if subcategorylink and subcategorylink != '#':
-                    yield scrapy.Request(url= itemsURL, cookies = self.cookies, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                    yield scrapy.Request(url= itemsURL, cookies = self.cookies, callback= self.parse_offsetvalueinputter, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname , 'catgoryid' : cid_value, 'offset' : offsetvalue })
 
-    def parse_individualitemdetails(self, response):
-        lua_script = """
-        function main(splash, args)
-            local url = args.url  -- This is the ResponseURL you pass as an argument
-            splash:go(url)
-            splash:wait(2.0)
-
-            local previous_height = splash:evaljs("document.body.scrollHeight")
-            
-            while true do
-                local more_button = splash:select(".loadButton_wWQ3F")
-                if more_button then
-                    more_button:click()
-                    splash:wait(3.0)
-                else
-                    break
-                end
-
-                local current_height = splash:evaljs("document.body.scrollHeight")
-                if current_height == previous_height then
-                    break
-                end
-                previous_height = current_height
-            end
-
-            return splash:html()
-        end
-        """
+    def parse_offsetvalueinputter(self, response):
         # print(response.url)
         category = response.meta['categoryname']
         subcategoryname = response.meta['subcategoryname']
+        offset = response.meta['offset']
+        id = response.meta['catgoryid']
         json_data = json.loads(response.body)
         product_data = json_data.get('products', [])
+        itemcount= json_data.get('itemCount')
+        print(f"following is the data{product_data}")
         for product in product_data:
+            # print("ive gotten here")
             itemname = product.get('name')
+            print(f"following are the itemnames{itemname}")
             product_price = product.get('price', {}).get('current', {}).get('text')
+            print(f"following are the prices for the items{product_price}")
+            if offset+200 < itemcount:
+                new_offset = offset+200
+                new_url = f"https://www.asos.com/api/product/search/v2/categories/{id}?offset={new_offset}&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
+                yield scrapy.Request(new_url, callback=self.parse_offsetvalueinputter, meta={'offset': new_offset, 'catgoryid': id, 'categoryname': category, 'subcategoryname': subcategoryname})
+
+        # Regardless of the offset condition, callback to another function
+        # actual_url = f"https://www.asos.com/api/product/search/v2/categories/{category}?offset=200&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
+        # yield scrapy.Request(url=actual_url, cookies=self.cookies, callback=self.parse_individual_item_details, meta={'categoryname': category, 'subcategoryname': subcategoryname, 'itemcount': item_count})
             product_url = product.get('url')
             actualproduct_url = f"{self.homeURL}/{product_url}"
             yield scrapy.Request(url= actualproduct_url, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'product_price':product_price,  'subcategoryname': subcategoryname, 'categoryname': category})
+        # try:
+        #     data = json.loads(response.body)
+        #     itemcount= data.get('itemCount')
+        #     actualurl = f"https://www.asos.com/api/product/search/v2/categories/{category}?offset=200&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
+        #     if(itemcount):
+        #         yield scrapy.Request(url= actualurl, cookies = self.cookies, callback= self.parse_individualitemdetails, meta={'categoryname': category , 'subcategoryname': subcategoryname, 'itemcount': itemcount})
+        # except json.JSONDecodeError:
+        #     self.log("Failed to parse JSON from response")
+        #     return
+        #  itemcount = response.get(itemCount)
+
+    def parse_individualitemdetails(self, response):
+        # lua_script = """
+        # function main(splash, args)
+        #     local url = args.url  -- This is the ResponseURL you pass as an argument
+        #     splash:go(url)
+        #     splash:wait(2.0)
+
+        #     local previous_height = splash:evaljs("document.body.scrollHeight")
+            
+        #     while true do
+        #         local more_button = splash:select(".loadButton_wWQ3F")
+        #         if more_button then
+        #             more_button:click()
+        #             splash:wait(3.0)
+        #         else
+        #             break
+        #         end
+
+        #         local current_height = splash:evaljs("document.body.scrollHeight")
+        #         if current_height == previous_height then
+        #             break
+        #         end
+        #         previous_height = current_height
+        #     end
+
+        #     return splash:html()
+        # end
+        # """
+        # print(response.url)
+        category = response.meta['categoryname']
+        subcategoryname = response.meta['subcategoryname']
+        itemcount = response.meta['itemcount']
+        print(response.body)
+        json_data = json.loads(response.body)
+        product_data = json_data.get('products', [])
+        print(f"following is the data{product_data}")
+        for product in product_data:
+            print("ive gotten here")
+            itemname = product.get('name')
+            print(f"following are the itemnames{itemname}")
+        #     # itemName.append(itemname)
+            
+        #     product_price = product.get('price', {}).get('current', {}).get('text')
+        #     print(f"following are the prices for the items{product_price}")
+        #     product_url = product.get('url')
+        #     actualproduct_url = f"{self.homeURL}/{product_url}"
+        #     # yield scrapy.Request(url= actualproduct_url, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'product_price':product_price,  'subcategoryname': subcategoryname, 'categoryname': category})
+        # numofitems = len(itemName)
+        # print(f"the number of items scraped are {numofitems}")
+        # print(f"the total number of items are {itemcount}")    
             # print(itemname)
             # print(product_price_details)
 
@@ -378,7 +428,7 @@ class DataStoreSpider(scrapy.Spider):
                 break
             # image_urls = [image.get('url') for image in product_images]
         print(product_item)
-        yield product_item
+        # yield product_item
         # gender = prodULRdata.get('gender')
         # print(productbrandName)
         # print(producttype)
