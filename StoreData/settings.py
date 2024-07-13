@@ -165,6 +165,7 @@ DOWNLOADER_MIDDLEWARES = {
    'scrapy_splash.SplashCookiesMiddleware': 723,
    'scrapy_splash.SplashMiddleware': 725,
    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+   'StoreData.middlewares.Retry429Middleware': 543,
    # 'StoreData.ProxyRotationMiddleware.ProxyRotationMiddleware': 100,
    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
    # StoreData\ProxyRotationMiddleware.py
@@ -172,6 +173,9 @@ DOWNLOADER_MIDDLEWARES = {
 SELENIUM_DRIVER_NAME = 'chrome'
 # SELENIUM_DRIVER_EXECUTABLE_PATH = 'C:/chromedriver_win32'
 SELENIUM_DRIVER_ARGUMENTS=['--headless']
+RETRY_TIMES = 10  # Number of times to retry a request
+RETRY_HTTP_CODES = [429]  # HTTP codes to retry
+
 # HTTP_PROXY = '92.119.177.20:443'
 # 45.150.5.3
 # If you need to use SOCKS proxy, you can configure it as well
@@ -217,7 +221,7 @@ EXTENSIONS = {
 #HTTPCACHE_DIR = "httpcache"
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 5
 # DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'

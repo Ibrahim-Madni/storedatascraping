@@ -71,16 +71,46 @@ class ProductItem(scrapy.Item):
 
 class DataStoreSpider(scrapy.Spider):
     name = "farfetchspider"
-    homeURL = "https://www.farfetch.com/ae"
+    homeURL = "https://www.farfetch.com"
     subcat_item = SubcategoryItem()
+    lua_script = """
+    function main(splash)
+        -- Go to the URL (replace with your actual URL)
+        assert(splash:go(splash.args.url))
 
+        -- Wait for the page to load (adjust wait time if needed)
+        splash:wait(2)
+
+        -- Select the button using the CSS selector
+        local button = splash:select("div#slice-container > div.ltr-1p6ifn1.eg8xtxy3 > div > div.ltr-10pik5s.eg8xtxy2 > button")
+
+        -- Ensure the button was found before attempting to click it
+        if button then
+            -- Click the button using mouse_click method
+            assert(button:mouse_click())
+
+            -- Optional: Wait for the page to reload after clicking (adjust wait time if needed)
+            splash:wait(2)
+
+            -- Return the rendered HTML
+            return splash:html()
+        else
+            return {
+                error = "Button not found"
+            }
+        end
+    end
+    """
         
 
     def start_requests(self):
-        start_urls = ['https://www.farfetch.com/ae/shopping/women/clothing-1/items.aspx']
+        start_urls = ['https://www.farfetch.com/ae/shopping/women/clothing-1/items.aspx', 'https://www.farfetch.com/ae/shopping/men/clothing-2/items.aspx']
+        # https://www.farfetch.com/ae/shopping/women/clothing-1/items.aspx'
+        # https://www.farfetch.com/ae/shopping/men/clothing-2/items.aspx
         for url in start_urls:
             item = StoreItem()
-            yield SplashRequest(url, callback=self.parse)
+            yield SplashRequest(url, self.parse, endpoint='execute', args={'lua_source': self.lua_script, 'wait': 2})
+
     def remove_force_sid(self, url):
     # Splitting URL into base and parameters
         base_url, _, params = url.partition('?')
@@ -109,28 +139,48 @@ class DataStoreSpider(scrapy.Spider):
 
     def parse(self, response):
         #collapsed-panel-category > div > ul > li:nth-child(1)
-        """
-        function main(splash)
-            -- Go to the URL (replace with your actual URL)
-            assert(splash:go(splash.args.url))
+        
+        # filename ="returnedsplashdata.html"
+        # with open(filename, 'wb')  as f:
+        #     f.write(response.body)
+        #     self.log(f'Saved HTML content to {filename}')
+        # print(response.body)
+        url = response.url
+        url_parts = url.split('/')
 
-            -- Wait for the page to load (adjust wait time if needed)
-            splash:wait(2)
+        # Extract the desired part by index (for example, the 5th part which is 'women')
+        extracted_part = url_parts[5]
+        # print(extracted_part)
+        categoryname = ""
+        if extracted_part == "women":
+            categoryname = extracted_part
+        elif extracted_part == "men":
+            categoryname == extracted_part
+        print(categoryname) 
+        possiblewomensubcaturls = ['/ae/shopping/women/activewear-1/items.aspx', '/ae/shopping/women/coats-1/items.aspx', '/ae/shopping/women/denim-1/items.aspx', '/ae/shopping/women/dresses-1/items.aspx', '/ae/shopping/women/jackets-1/items.aspx', '/ae/shopping/women/skirts-1/items.aspx', '/ae/shopping/women/tops-1/items.aspx', '/ae/shopping/women/trousers-1/items.aspx']
+        possiblemensubcaturls = ['/ae/shopping/women/activewear-1/items.aspx', '/ae/shopping/women/coats-1/items.aspx', '/ae/shopping/women/denim-1/items.aspx', '/ae/shopping/women/dresses-1/items.aspx', '/ae/shopping/women/jackets-1/items.aspx', '/ae/shopping/women/skirts-1/items.aspx', '/ae/shopping/women/tops-1/items.aspx', '/ae/shopping/women/trousers-1/items.aspx']
+        # #catalog-actions > div.ltr-4ew8u6 > div > div > a:nth-child(1)
+        a_tags = "nav#unstructured_navigation > a"
+        for a in response.css(a_tags):
 
-            -- Select the button using the CSS selector
-            local button = splash:select("#slice-container > div.ltr-1p6ifn1.eg8xtxy3 > div > div.ltr-10pik5s.eg8xtxy2 > button")
+            href = a.css('::attr(href)').get()
+            subcatname = a.css('::text').get()
+            # print(f'Text: {text}, Href: {href}')
+            if href in possiblewomensubcaturls:
+                actualurl = f"{self.homeURL}{href}"
+                yield SplashRequest(actualurl, self.parse_menitems, meta={'subcategoryname':subcatname }, args={'wait': 7})
 
-            -- Click the button using mouse_click method
-            assert(button:mouse_click())
-
-            -- Optional: Wait for the page to reload after clicking (adjust wait time if needed)
-            splash:wait(2)
-
-            -- Return the rendered HTML (optional)
-            return splash:html()
-        end
-        """
-        # print(response.url)
+                
+        # "div[data-selector='catalog-quick-filters'] > a"
+        # for filter in response.css(filterdata):
+        #     print("filter found")
+        #     itemlinks = filter.get("::attr(href)").get()
+        #     print(itemlinks)
+        # data = response.body.decode('utf-8')
+        # with open(filename, 'w', encoding='utf-8') as f:
+        #     f.write(data)
+        #     self.log(f'Saved HTML content to {filename}')
+        # hrefs = []
         # clothingnavigationitems = "div[data-testid='filterContainer'] > ul > li"
         # for li in response.css(clothingnavigationitems):
         #     navigationURL = li.css("a::attr(href)").get()
@@ -139,40 +189,97 @@ class DataStoreSpider(scrapy.Spider):
         #     print(navigationURL)
 
 
-        script_elements = response.xpath('//script').extract()
-        for script in script_elements:
-            if 'window.__HYDRATION_STATE__="' in script:
+        # script_elements = response.xpath('//script').extract()
+        # for script in script_elements:
+        #     if 'window.__HYDRATION_STATE__="' in script:
+        #         # filename = 'farfetch_url_document.html'
+        #         # with open(filename, 'w', encoding='utf-8') as f:
+        #         # print(script)
+        #         script_content = script.strip('<script>').strip('</script>')
+        #         # print(script_content)
+        #         # products = json.loads(script_content)
+        #         # filename = "farfetch"
+        #         # with open(filename, 'w', encoding='utf-8') as f:
+        #         #         f.write(script_content)
+        #         #         self.log(f'Saved HTML content to {filename}')
+        #         # print(products)
+        #         # try:
+        #         #     data = json.loads(script_content)
+        #         #     url = data.get('uri', data.get('url'))  # Check for both 'uri' and 'url' keys
+        #         #     if url:
+        #         #         return url
+        #         # except json.JSONDecodeError:
+        #         #     pass
+        #         pattern = r'"href\":\ ?"(.*?)"'  # Capture everything between quotes
+
+        #         match = re.search(pattern, script_content)
+
+        #         if match:
+        #             print("i was here")
+        #             extracted_href = match.group(1)
+        #             print(extracted_href)
+        #         else:
+        #             print("im fucked")
+                # url_pattern = r"\"uri\":\".*?\"|\"url\":\".*?\"(?=,)"  # Match 'uri' or 'url'
+                # match = re.search(url_pattern, script_content)
+
+                # if match:
+                #     
+                #     url = match.group(0)[7:-1]  # Extract URL group and remove quotes
+                #     return url
+                # else:
+                #     print("im fucked")
+    #             url_pattern = r"\"url\":\".*?\"(?=,)"  # Escape special characters
+
+    #             # Search for the URL using the pattern
+    #             match = re.search(url_pattern, script_content)
+    #             if match:
+    # # Extract the URL group
+    #                 url = match.group(0)[7:-1]  # Remove leading/trailing characters
+    #                 print(url)  # Print the extracted URL
+    #             else:
+    #                 print("URL not found in the script data.")
+                # match = re.search(r'"url":"(.*?)"', script_content)
+                # if match:
+                #     href = match.group(1)
+                #     print(href)
+
+                # hrefs.extend(re.findall(r'"url\":\s*"(.*?)"', script))
+                # print(hrefs)
+        # Now hrefs list contains all the extracted href contents
+        # for href in hrefs:
+        #     self.log(f"Extracted href: {href}")
                 # Print the script for debugging
                 # print("Full script content:")
                 # print(script)
 
-                # Remove <script> tags
-                script_content = script.strip('<script>').strip('</script>')
+        #         # Remove <script> tags
+        #         script_content = script.strip('<script>').strip('</script>')
 
-                # Debug: Print the initial part of the script content
-                # print("Initial part of script content:")
-                # print(script_content[:500])  # Print first 500 characters to inspect
+        #         # Debug: Print the initial part of the script content
+        #         # print("Initial part of script content:")
+        #         # print(script_content[:500])  # Print first 500 characters to inspect
 
-                # Find the start and end of the JSON content
-                json_start = script_content.find(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],') + len(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],')
-                json_end = script_content.rfind(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],''')
-                context_radius = 70
-                print(f"Context around json_start ({json_start}):")
-                print(script_content[json_start-context_radius:json_start+context_radius])
-                # print(f"Context around json_end ({json_end}):")
-                # print(script_content[json_end-context_radius:json_end+context_radius])
+        #         # Find the start and end of the JSON content
+        #         json_start = script_content.find(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],') + len(':[{\\"scaleId\\":34061,\\"size\\":\\"XXS\\"},{\\"scaleId\\":34061,\\"size\\":\\"XS\\"}],')
+        #         json_end = script_content.rfind(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],''')
+        #         context_radius = 70
+        #         print(f"Context around json_start ({json_start}):")
+        #         print(script_content[json_start-context_radius:json_start+context_radius])
+        #         # print(f"Context around json_end ({json_end}):")
+        #         # print(script_content[json_end-context_radius:json_end+context_radius])
 
-                print(f"The starting point for the JSON is {json_start}")
-                print(f"The ending point for the JSON is {json_end}")
-                if json_start != -1 and json_end != -1:
-                    print("i AM FINALLY HERE")
-                    # Extract the JSON content ensuring json_end is included
-                    json_content = script_content[json_start:json_end + len(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],')]
+        #         print(f"The starting point for the JSON is {json_start}")
+        #         print(f"The ending point for the JSON is {json_end}")
+        #         if json_start != -1 and json_end != -1:
+        #             print("i AM FINALLY HERE")
+        #             # Extract the JSON content ensuring json_end is included
+        #             json_content = script_content[json_start:json_end + len(',\\"value\\":\\"991324\\",\\"description\\":\\"ÊtreCécile\\",\\"count\\":3,\\"deep\\":0}],')]
                     
-                    # Clean up the extracted JSON content
-                    json_content = json_content.replace('\\"', '"').replace('\\n', '').replace('\\t', '').replace('\\', '')
-                    json_content = json_content.strip('"')
-                    print(json_content)
+        #             # Clean up the extracted JSON content
+        #             json_content = json_content.replace('\\"', '"').replace('\\n', '').replace('\\t', '').replace('\\', '')
+        #             json_content = json_content.strip('"')
+        #             print(json_content)
                     # filename = 'farfetch_url_document.html'
                     # with open(filename, 'w', encoding='utf-8') as f:
                     #     f.write(json_content)
@@ -200,40 +307,114 @@ class DataStoreSpider(scrapy.Spider):
             #     yield  scrapy.Request(url= GenderClothingURL, callback= self.parse_menitems ,meta={'CategoryName': GenderClothingName})
     
     def parse_menitems(self, response):
+        print(response.url)
+        # filename ="returnedindividualsubcategoryinformation.html"
+        # with open(filename, 'wb')  as f:
+        #     f.write(response.body)
+        #     self.log(f'Saved HTML content to {filename}')
+        subcategory = response.meta['subcategoryname']
+        script_elements = response.xpath('//script').extract()
+        images = []
+        processed_urls = []
+        itemimage = ""
+        nextpageURL= f"{response.url}{paginationbutton}"
+        print(nextpageURL)
+        paginationbutton = response.css("a[data-component='PaginationNextActionButton']::attr(href)").get()
+        if paginationbutton != None:
+            nextpageURL = f"{response.url}{paginationbutton}"
+            print(nextpageURL)
+            # yield SplashRequest(nextpageURL, self.parse_menitems, meta={'subcategoryname': subcategory}, args={'wait': 7})
+        else:
+            # If pagination button is not found, retry
+            retry_count = response.meta.get('retry_count', 0)
+            if retry_count < 3:  # Retry up to 3 times
+                self.logger.info(f"Pagination button not found, retrying... (Attempt {retry_count + 1})")
+                yield SplashRequest(response.url, self.parse_menitems, meta={'subcategoryname': subcategory, 'retry_count': retry_count + 1}, args={'wait': 7})
+            else:
+                self.logger.warning(f"Pagination button not found after {retry_count} retries, giving up.")
+        # print(paginationbutton)
+     
         
-       
-        lua_script = """
-        function main(splash, args)
-            local url = args.url  -- This is the ResponseURL you pass as an argument
-            splash:go(url)
-            splash:wait(2.0)
+        # for idx, script in enumerate(script_elements):
+        #     if 'type="application/ld+json"' in script and '"itemListElement"' in script:
+        #         json_content = script.split('>', 1)[1].rsplit('</script>', 1)[0].strip()
+        #         json_data = json.loads(json_content)
+                
+        #         # print(json_data)
+        #         item_list_elements = json_data.get("itemListElement", [])
+        #         for items in item_list_elements:
+        #             itemname = items.get("name")
+        #             # print(itemname)
+        #             itemprice = items.get("offers",{}).get("price")
+        #             itembrand = items.get("brand",{}).get("name")
+        #             itempriceunit = items.get("offers",{}).get("priceCurrency")
+        #             actualitemprice = f"{itemprice}{itempriceunit}"
+        #             itemurl = items.get("offers",{}).get("url")
+        #             actualitemurl = f"{self.homeURL}{itemurl}"
+        #             if actualitemurl not in processed_urls:
+        #                 processed_urls.append(actualitemurl)
+        #                 for image in items.get("image", []):
+        #                     itemimage = image
+        #                     break
+        #             # print(itemimage)
+        #                 # itemimage = image
+        #                 yield SplashRequest(url= actualitemurl, callback= self.parse_individualitemdetails, meta={'itemname': itemname, 'itemprice': actualitemprice , 'subcategory': subcategory, 'itembrand': itembrand, 'image': itemimage})
+        
+        # yield SplashRequest(url= nextpageURL, callback= self.parse_menitems, meta={'subcategory': subcategory, })
+                    # if actualitemurl:
+                        # 
+                    # print(f"following are the item properties name: {itemname}, price: {itemprice}{itempriceunit}, itemurl : {itemurl}")
 
-            local category_button = splash:select("div.x_RqXmD > button[data-index='2']")
-            if category_button then
-                category_button:click()
-                splash:wait(3.0)
-            end
+                # filename = "itemlist.json"
+                # with open(filename, 'wb') as f:
+                #     f.write(json.dumps(item_list_elements, ensure_ascii=False, indent=4).encode('utf-8'))  # Convert list to JSON string and encode to bytes
+                #     self.log(f'Saved item list elements to {filename}')
+                # print(item_list_elements)
+            # else:
+            #     print("nothing was found")
+        #     # Create a filename for each script element
+        #     filename = f"scriptcontent_{idx+1}.html"
 
-            return splash:html()
-        end
-        """
+        #     # Write the content to the file
+        #     with open(filename, 'wb') as f:
+        #         f.write(script.encode('utf-8'))  # Encode the string to bytes
+        #         self.log(f'Saved HTML content to {filename}')
+        # if '"itemListElement"' in script_elements:
+        #     print(script_elements)
+        # else:
+        #     print("im fucked")
+        # lua_script = """
+        # function main(splash, args)
+        #     local url = args.url  -- This is the ResponseURL you pass as an argument
+        #     splash:go(url)
+        #     splash:wait(2.0)
+
+        #     local category_button = splash:select("div.x_RqXmD > button[data-index='2']")
+        #     if category_button then
+        #         category_button:click()
+        #         splash:wait(3.0)
+        #     end
+
+        #     return splash:html()
+        # end
+        # """
     
-        categoryname = response.meta['CategoryName']
+        # categoryname = response.meta['CategoryName']
         
-        subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(3) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
-        #goes through all the list items and extracts subcategories within the clothing item sublist
-        for li in subcategoryNavigation:
-            allsubcategorylink = li.css("a::attr(href)").get()
-            lowercasecategoryname = categoryname.lower()
-            #Comparison parameter
-            #this peice of code on Line 187 is used to compare the category name with the endpoint of the extracted subcategory link so we dont have unnecessary subcategoryitems that were within the list that are not relevant to the category
-            if lowercasecategoryname == allsubcategorylink.split('/')[3].lower():
-                subcategoryname = li.css("a::text").get()
-                subcategorylink = li.css("a::attr(href)").get()
-                print(subcategoryname)
-                print(subcategorylink)
-                if subcategorylink and subcategorylink != '#':
-                    yield SplashRequest(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+        # subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(3) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
+        # #goes through all the list items and extracts subcategories within the clothing item sublist
+        # for li in subcategoryNavigation:
+        #     allsubcategorylink = li.css("a::attr(href)").get()
+        #     lowercasecategoryname = categoryname.lower()
+        #     #Comparison parameter
+        #     #this peice of code on Line 187 is used to compare the category name with the endpoint of the extracted subcategory link so we dont have unnecessary subcategoryitems that were within the list that are not relevant to the category
+        #     if lowercasecategoryname == allsubcategorylink.split('/')[3].lower():
+        #         subcategoryname = li.css("a::text").get()
+        #         subcategorylink = li.css("a::attr(href)").get()
+        #         print(subcategoryname)
+        #         print(subcategorylink)
+        #         if subcategorylink and subcategorylink != '#':
+        #             yield SplashRequest(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
 
     def parse_individualitemdetails(self, response):
         lua_script = """
@@ -264,44 +445,55 @@ class DataStoreSpider(scrapy.Spider):
         end
         """
         print(response.url)
-        category = response.meta['categoryname']
-        subcategoryname = response.meta['subcategoryname']
-        
-        
-        self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
-        ItemSections= "section.listingPage_HfNlp > article"
-        LoadMoreButton = response.css("a[data-auto-id='loadMoreProducts']::attr(href)").get()
-        #product-205597587 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-        #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-        for article in response.css(ItemSections):
-            # itemnames = article.css("a > p.productDescription_sryaw::text").get()
-            #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            itemURL = article.css("a::attr(href)").get()
-            itemname = article.css("a > p.productDescription_sryaw::text").get()
-            #product-206835688 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div
-            #product-206492427 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            #product-205491471 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
-            # itemimage = article.css("a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img::attr(src)").get()
-            # print(itemimage)
-            # for img in itemimage:
-            #     images = img.css("::attr(src)").get()
-            #     print(images)
-            # itemprice = article.css("a > p.container_s8SSI > span.originalPrice_jEWt1 > span.price__B9LP::text").get()
-            # print(itemimage)
-            # print(itemname)
+        # {'itemname': itemname, 'itemprice': actualitemprice , 'subcategory': subcategory}
+        Itemname = response.meta['itemname']
+        Itemprice = response.meta['itemprice']
+        subcategoryname = response.meta['subcategory']
+        itembrand = response.meta['itembrand']
+        itemimage = response.meta['image']
+        print(f"following are the item details Itemname: {Itemname}, /n Itemprice : {Itemprice}, /n subcategorydetail : {subcategoryname}, /n itembrand: {itembrand}, /n itemimage : {itemimage}")
+        itemhighlights = "ul._fdc1e5 > li"
+        itemcomposition = "div.ltr-92qs1a > p"
+        for listitem in response.css(itemhighlights):
+            itemdetail = listitem.css("::text").get()
+            # print(itemdetail)
+        for metadataitem in response.css(itemcomposition):
+            metadata = metadataitem.css("::text").get()
+            # print(metadata)
+        # self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
+        # ItemSections= "section.listingPage_HfNlp > article"
+        # LoadMoreButton = response.css("a[data-auto-id='loadMoreProducts']::attr(href)").get()
+        # #product-205597587 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        # #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        # for article in response.css(ItemSections):
+        #     # itemnames = article.css("a > p.productDescription_sryaw::text").get()
+        #     #product-203390299 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     itemURL = article.css("a::attr(href)").get()
+        #     itemname = article.css("a > p.productDescription_sryaw::text").get()
+        #     #product-206835688 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div
+        #     #product-206492427 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     #product-205491471 > a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img
+        #     # itemimage = article.css("a > div.productMediaContainer_kmkXR.mediaContainer_rdzv9 > div > img::attr(src)").get()
+        #     # print(itemimage)
+        #     # for img in itemimage:
+        #     #     images = img.css("::attr(src)").get()
+        #     #     print(images)
+        #     # itemprice = article.css("a > p.container_s8SSI > span.originalPrice_jEWt1 > span.price__B9LP::text").get()
+        #     # print(itemimage)
+        #     # print(itemname)
             
             
-            # print(itemURL)
-            if itemURL:
-                yield scrapy.Request(url= itemURL, callback= self.parse_itempage, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})    
+        #     # print(itemURL)
+        #     if itemURL:
+        #         yield scrapy.Request(url= itemURL, callback= self.parse_itempage, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})    
 
-            # print(itemnames)
+        #     # print(itemnames)
             
        
         
-        if LoadMoreButton:
-            # print("LoadMoreButton found")
-            yield scrapy.Request(url= LoadMoreButton, callback= self.parse_individualitemdetails, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
+        # if LoadMoreButton:
+        #     # print("LoadMoreButton found")
+        #     yield scrapy.Request(url= LoadMoreButton, callback= self.parse_individualitemdetails, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
             # if itemnames:
             #     itemnames_list.append(itemnames) 
 

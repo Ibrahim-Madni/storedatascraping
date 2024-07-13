@@ -2,7 +2,7 @@ import pandas as pd
 import json
 
 # Load the CSV into a DataFrame
-df = pd.read_csv('actualzarastore.csv')
+df = pd.read_csv('asosspidertest.csv')
 
 # Function to update the path in the JSON string based on conditions
 def update_paths(json_str):
@@ -16,10 +16,10 @@ def update_paths(json_str):
         for item in json_data:
             item['path'] = item['path'].replace('\\', '/')
             
-            if 'WOMAN' in item['path']:
-                item['path'] = item['path'].replace('WOMAN', 'women_clothing_items')
-            elif item['path'].startswith('MAN'):
-                item['path'] = item['path'].replace('MAN', 'men_clothing_items')
+            if 'WOMEN' in item['path']:
+                item['path'] = item['path'].replace('WOMEN', 'women_clothing_items')
+            elif item['path'].startswith('MEN'):
+                item['path'] = item['path'].replace('MEN', 'men_clothing_items')
         
     #     # Convert back to JSON string
         updated_json_str = json.dumps(json_data)
@@ -33,6 +33,6 @@ column_name = "images"
 df[column_name] = df[column_name].apply(update_paths)
 
 # Save the modified DataFrame to a new CSV file
-df.to_csv('new_and_improved.csv', index=False)
+df.to_csv('new_and_improved_asos.csv', index=False)
 # Ensure the DataFrame looks like the desired format
 # print(df[column_name].tolist())

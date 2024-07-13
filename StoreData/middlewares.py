@@ -4,7 +4,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+import time
+from scrapy.exceptions import IgnoreRequest
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
@@ -101,3 +102,39 @@ class StoredataDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+
+class Retry429Middleware:
+    def __init__(self, crawler):
+        self.retry_times = crawler.settings.getint('RETRY_TIMES', 10)
+        self.retry_http_codes = set(int(x) for x in crawler.settings.getlist('RETRY_HTTP_CODES', []))
+        self.retry_http_codes.add(429)
+        self.crawler = crawler
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        middleware = cls(crawler)
+        crawler.signals.connect(middleware.spider_opened, signal=signals.spider_opened)
+        return middleware
+
+    def spider_opened(self, spider):
+        self.max_retry_times = self.retry_times
+
+    def process_response(self, request, response, spider):
+        if response.status in self.retry_http_codes:
+            retries = request.meta.get('retry_times', 0) + 1
+
+            if retries <= self.max_retry_times:
+                wait_time = 40 + retries % 3  # Wait between 5 to 7 seconds
+                spider.logger.info(f"Retrying {request.url} (failed {retries} times) in {wait_time} seconds due to status {response.status}")
+                time.sleep(wait_time)
+
+                retry_req = request.copy()
+                retry_req.meta['retry_times'] = retries
+                retry_req.dont_filter = True
+
+                return retry_req
+            else:
+                spider.logger.info(f"Gave up retrying {request.url} (failed {retries} times) due to status {response.status}")
+                raise IgnoreRequest(f"Retries exceeded for {request.url}")
+
+        return response
