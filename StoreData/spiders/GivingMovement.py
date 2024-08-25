@@ -21,6 +21,7 @@ class ProductItem(scrapy.Item):
     images = scrapy.Field()
     CategoryTitle = scrapy.Field()
     subcategoryTitle = scrapy.Field()
+    ItemDescription = scrapy.Field()
     image_urls = scrapy.Field()
     ItemColour = scrapy.Field()
     ItemTitle = scrapy.Field()
@@ -40,7 +41,7 @@ class ProductItem(scrapy.Item):
     MetaData11 = scrapy.Field()
     MetaData12 = scrapy.Field()
     MetaData13 = scrapy.Field()
-    
+    ItemURL = scrapy.Field()
     SubcategoryName = scrapy.Field()
     categoryName = scrapy.Field()
     Size1 = scrapy.Field()
@@ -177,31 +178,36 @@ class DataStoreSpider(scrapy.Spider):
         #chrome-sticky-header > div.AIjKzKx > div:nth-child(1) > nav > div > div > button.yI6sHXc.TYb4J9A.fVdHxMU.QNzo9qy > span > span
         responsesplitendpoint = "/".join(response.url.split("/")[-2:])
         collection_name = responsesplitendpoint.split("/")[-1].split("?")[0]
-        # print(collection_name)
-
+        print(collection_name)
+        acceptable_men_subcategories = ["https://thegivingmovement.com/collections/tops-men?nav=true", "/collections/top-long-sleeve-mens?nav=true", "https://thegivingmovement.com/collections/shorts-mens?nav=true", "https://thegivingmovement.com/collections/joggers-mens?nav=true", "https://thegivingmovement.com/collections/jackets-mens?nav=true", "/collections/hoodies-and-sweatshirts-mens?nav=true"]
+        acceptable_women_subcategories = ["https://thegivingmovement.com/collections/tshirts-women?nav=true", "https://thegivingmovement.com/collections/top-long-sleeve-womens?nav=true", "/collections/leggings-womens?nav=true", "https://thegivingmovement.com/collections/shorts-womens?nav=true", "https://thegivingmovement.com/collections/joggers-womens?nav=true", "https://thegivingmovement.com/collections/jackets-womens?nav=true", "/collections/hoodies-and-sweatshirts-womens?nav=true" ]
         if collection_name == 'womens-collection':
             subcategoryNavigation = "div#NavigationTier2-1 > div.container > ul > li.navigation__item.navigation__item--with-children.navigation__column > div.navigation__tier-3-container.navigation__child-tier  > ul.navigation__tier-3 > li"
             for li in response.css(subcategoryNavigation):
                 subcategoryname = li.css("a::text").get()
+                
                 allsubcategorylink = li.css("a::attr(href)").get()
-                domain_name = "/".join(allsubcategorylink.split("/")[:3])
-                if domain_name == self.homeURL:
-                    yield scrapy.Request(url= allsubcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
-                else:
-                    subcategorylink = self.homeURL + domain_name
-                    yield scrapy.Request(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                if allsubcategorylink in acceptable_women_subcategories:
+                    domain_name = "/".join(allsubcategorylink.split("/")[:3])
+                    if domain_name == self.homeURL:
+                        yield scrapy.Request(url= allsubcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                    else:
+                        subcategorylink = self.homeURL + domain_name
+                        yield scrapy.Request(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
 
         else:
             subcategoryNavigation = "div#NavigationTier2-2 > div.container > ul > li.navigation__item.navigation__item--with-children.navigation__column > div.navigation__tier-3-container.navigation__child-tier  > ul.navigation__tier-3 > li"
             for li in response.css(subcategoryNavigation):
                 subcategoryname = li.css("a::text").get()
                 allsubcategorylink = li.css("a::attr(href)").get()
-                domain_name = "/".join(allsubcategorylink.split("/")[:3])
-                if domain_name == self.homeURL:
-                    yield scrapy.Request(url= allsubcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
-                else:
-                    subcategorylink = self.homeURL + domain_name
-                    yield scrapy.Request(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                # print(allsubcategorylink)
+                if allsubcategorylink in acceptable_men_subcategories:
+                    domain_name = "/".join(allsubcategorylink.split("/")[:3])
+                    if domain_name == self.homeURL:
+                        yield scrapy.Request(url= allsubcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                    else:
+                        subcategorylink = self.homeURL + domain_name
+                        yield scrapy.Request(url= subcategorylink, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
                 # print(subcategoryname)
                 # print(allsubcategorylink)
         # subcategoryname = response.css("div.x_RqXmD:nth-of-type(1) > div.EsGFLPm:nth-of-type(3) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li > a::text").get()
@@ -246,55 +252,162 @@ class DataStoreSpider(scrapy.Spider):
         #     f.write(response.body)
         # self.log(f'Saved HTML content to {filename}')
     def parse_individualitemdetails(self, response):
-        lua_script = """
-        function main(splash, args)
-            local url = args.url  -- This is the ResponseURL you pass as an argument
-            splash:go(url)
-            splash:wait(2.0)
+        # lua_script = """
+        # function main(splash, args)
+        #     local url = args.url  -- This is the ResponseURL you pass as an argument
+        #     splash:go(url)
+        #     splash:wait(2.0)
 
-            local previous_height = splash:evaljs("document.body.scrollHeight")
+        #     local previous_height = splash:evaljs("document.body.scrollHeight")
             
-            while true do
-                local more_button = splash:select(".loadButton_wWQ3F")
-                if more_button then
-                    more_button:click()
-                    splash:wait(3.0)
-                else
-                    break
-                end
+        #     while true do
+        #         local more_button = splash:select(".loadButton_wWQ3F")
+        #         if more_button then
+        #             more_button:click()
+        #             splash:wait(3.0)
+        #         else
+        #             break
+        #         end
 
-                local current_height = splash:evaljs("document.body.scrollHeight")
-                if current_height == previous_height then
-                    break
-                end
-                previous_height = current_height
-            end
+        #         local current_height = splash:evaljs("document.body.scrollHeight")
+        #         if current_height == previous_height then
+        #             break
+        #         end
+        #         previous_height = current_height
+        #     end
 
-            return splash:html()
-        end
-        """
-        # print(response.url)
-        category = response.meta['categoryname']
+        #     return splash:html()
+        # end
+        # """
+        categoryname = response.meta['categoryname']
         subcategoryname = response.meta['subcategoryname']
+        processed_urls = []
+        processed_nextpage_urls = []
+        # print(categoryname)
+        # print(subcategoryname)
+        next_button =  response.css("link[rel='next']::attr(href)").get()
         
-        self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
-        # self.log(f'Saved HTML content and item names to {filename}')
-        # filename = 'individual_clothes_page.html'
-        # with open(filename, 'wb') as f:
-            # f.write(response.body)
-        # self.log(f'Saved HTML content to {filename}')
-        Itemcatalogue = "div.product-info > div.inner > div.innerer"
-        for div in response.css(Itemcatalogue):
-            subitemURL= div.css("a.product-link::attr(href)").get()
-            itemname= div.css("a.product-link > p::text").get()
-            if subitemURL:
-                itemURL = self.homeURL + subitemURL 
-                yield scrapy.Request(url= itemURL, callback= self.parse_itempage, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
-        LoadMoreButton = response.css("a.pagination__next.inh-col.underline.underline--on-hover::attr(href)").get()
-        print(LoadMoreButton)
-        if(LoadMoreButton):
-            itemURL = self.homeURL + subitemURL 
-            yield scrapy.Request(url= LoadMoreItemsURL, callback= self.parse_individualitemdetails, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
+        # print(next_button)
+        for product in response.css("div.product_card_all"):
+            # print(product)
+            # productlink = product.css("div.block-inner > div > div.product-info > div > div > a::attr(href)").get()
+            productname = product.css("div.block-inner > div > div.product-info > div > div > a > p::text").get()
+            productcolour = product.css("div.product-block-options__inner > span")
+            for colourvariants in productcolour:
+                actualcolour = colourvariants.css("::attr(data-color)").get()
+                productvariantlink = colourvariants.css("::attr(data-url)").get()
+                productpriceraw = colourvariants.css("::attr(data-price-text)").get()
+                pattern = r"</?span[^>]*>"
+                if productpriceraw:
+                    productprice = re.sub(pattern, "", productpriceraw).strip()
+                    pattern_unwanted = r'[^\dAED\s]'
+                    actualproductprice = re.sub(pattern_unwanted, "", productprice).strip()
+                    # print(actualproductprice)
+                    if productvariantlink not in processed_urls:
+                        processed_urls.append(productvariantlink)
+                        actualproductlink= f"{self.homeURL}{productvariantlink}"
+                        yield scrapy.Request(url= actualproductlink, callback= self.parse_itempage, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname, 'productprice': actualproductprice, "colour": actualcolour, "productname": productname })
+                    
+        if next_button:
+            next_page_url = f"{self.homeURL}{next_button}"
+            if next_page_url not in processed_nextpage_urls:
+                processed_nextpage_urls.append(next_page_url)
+                yield scrapy.Request(url= next_page_url, callback= self.parse_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+                    # if productprice:
+                    #     currency = productprice.group(1)
+                    #     value = int(productprice.group(2))
+                        # print(currency, value)
+                    # print(f"actual colour is {actualcolour}, the colour variant link is {productvariantlink} and the raw product price is {productprice}") 
+            # productpriceinteger = product.css("div.block-inner > div > div.product-info > div > div > a > div > span > span::text").get()
+            # print(f"product link : {productlink}, product Name is : {productname}, and the productpriceinteger is : {productpriceinteger}")
+    def parse_next_page_individualitemdetails(self, response):
+        categoryname = response.meta['categoryname']
+        subcategoryname = response.meta['subcategoryname']
+        processed_urls = []
+        # print(categoryname)
+        # print(subcategoryname)
+        next_button =  response.css("link[rel='next']::attr(href)").get()
+        
+        # print(next_button)
+        for product in response.css("div.product_card_all"):
+            # print(product)
+            # productlink = product.css("div.block-inner > div > div.product-info > div > div > a::attr(href)").get()
+            productname = product.css("div.block-inner > div > div.product-info > div > div > a > p::text").get()
+            productcolour = product.css("div.product-block-options__inner > span")
+            for colourvariants in productcolour:
+                actualcolour = colourvariants.css("::attr(data-color)").get()
+                productvariantlink = colourvariants.css("::attr(data-url)").get()
+                productpriceraw = colourvariants.css("::attr(data-price-text)").get()
+                pattern = r"</?span[^>]*>"
+                if productpriceraw:
+                    productprice = re.sub(pattern, "", productpriceraw).strip()
+                    pattern_unwanted = r'[^\dAED\s]'
+                    actualproductprice = re.sub(pattern_unwanted, "", productprice).strip()
+                    # print(actualproductprice)
+                     
+                    if productvariantlink not in processed_urls:
+                        processed_urls.append(productvariantlink)
+                        actualproductlink= f"{self.homeURL}{productvariantlink}"
+                        
+                        yield scrapy.Request(url= actualproductlink, callback= self.parse_itempage, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname, 'productprice': actualproductprice, "colour": actualcolour, "productname": productname })
+        if next_button:
+            next_page_url = f"{self.homeURL}{next_button}"
+            yield scrapy.Request(url= next_page_url, callback= self.parse_last_page_individualitemdetails, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname})
+        
+        
+    def parse_last_page_individualitemdetails(self, response):
+        categoryname = response.meta['categoryname']
+        subcategoryname = response.meta['subcategoryname']
+        processed_urls = []
+        # print(categoryname)
+        # print(subcategoryname)
+        # next_button =  response.css("link[rel='next']::attr(href)").get()
+        
+        # print(next_button)
+        for product in response.css("div.product_card_all"):
+            # print(product)
+            # productlink = product.css("div.block-inner > div > div.product-info > div > div > a::attr(href)").get()
+            productname = product.css("div.block-inner > div > div.product-info > div > div > a > p::text").get()
+            productcolour = product.css("div.product-block-options__inner > span")
+            for colourvariants in productcolour:
+                actualcolour = colourvariants.css("::attr(data-color)").get()
+                productvariantlink = colourvariants.css("::attr(data-url)").get()
+                productpriceraw = colourvariants.css("::attr(data-price-text)").get()
+                pattern = r"</?span[^>]*>"
+                if productpriceraw:
+                    productprice = re.sub(pattern, "", productpriceraw).strip()
+                    pattern_unwanted = r'[^\dAED\s]'
+                    actualproductprice = re.sub(pattern_unwanted, "", productprice).strip()
+                    # print(actualproductprice)
+                    if productvariantlink not in processed_urls:
+                        processed_urls.append(productvariantlink)
+                        actualproductlink= f"{self.homeURL}{productvariantlink}"
+
+                        yield scrapy.Request(url= actualproductlink, callback= self.parse_itempage, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname, 'productprice': actualproductprice, "colour": actualcolour, "productname": productname })
+       
+    #shopify-section-template--14532118544419__main > div > div.container.container--no-max > div.filter-container.filter-container--side.filter-container--show-filters-desktop.filter-container--mobile-initialised > div.filters-adjacent.collection-listing > div > div:nth-child(1)
+        # print(response.url)
+        # category = response.meta['categoryname']
+        # subcategoryname = response.meta['subcategoryname']
+        
+        # self.logger.info(f"Retrieved meta data: subcategoryname={subcategoryname}, categoryname={category}")
+        # # self.log(f'Saved HTML content and item names to {filename}')
+        # # filename = 'individual_clothes_page.html'
+        # # with open(filename, 'wb') as f:
+        #     # f.write(response.body)
+        # # self.log(f'Saved HTML content to {filename}')
+        # Itemcatalogue = "div.product-info > div.inner > div.innerer"
+        # for div in response.css(Itemcatalogue):
+        #     subitemURL= div.css("a.product-link::attr(href)").get()
+        #     itemname= div.css("a.product-link > p::text").get()
+        #     if subitemURL:
+        #         itemURL = self.homeURL + subitemURL 
+        #         yield scrapy.Request(url= itemURL, callback= self.parse_itempage, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
+        # LoadMoreButton = response.css("a.pagination__next.inh-col.underline.underline--on-hover::attr(href)").get()
+        # print(LoadMoreButton)
+        # if(LoadMoreButton):
+        #     itemURL = self.homeURL + subitemURL 
+        #     yield scrapy.Request(url= LoadMoreItemsURL, callback= self.parse_individualitemdetails, meta={'itemname': itemname, 'subcategoryname': subcategoryname, 'categoryname': category})
         # # # print(LoadMoreButton)
         # # # itemnames_list = [] 
         # for div in response.css(ItemSections):
@@ -338,11 +451,109 @@ class DataStoreSpider(scrapy.Spider):
         # print(response)
     def parse_itempage(self, response):
         product_item = ProductItem()
+        # 
+        # 
+
+        # 
+        product_item_list = []
+
         categoryname = response.meta['categoryname']
         SubcategoryName = response.meta['subcategoryname']
-        print(categoryname)
-        print(SubcategoryName)   
-        Itemname = response.meta['itemname']
+        productprice = response.meta['productprice']
+        colour = response.meta['colour']
+        productname = response.meta['productname']
+        #headlessui-disclosure-panel-2 > ul > li:nth-child(1)
+        product_item['ItemURL'] = response.url
+        product_item['CategoryTitle'] = categoryname
+        product_item['subcategoryTitle'] = SubcategoryName
+        product_item['ItemTitle'] = productname
+        product_item['ItemPrice'] = productprice
+        product_item['ItemColour'] = colour
+        metadatalist = response.css("div.pb-16 > disclosure-panel > ul > li")
+        metadatafit = response.css("div > disclosure-panel > p").get()
+        description_pattern = r"<strong>(.*?)</strong>"
+        descriptionmatch = re.search(description_pattern, metadatafit)
+        if descriptionmatch:
+            strong_content = descriptionmatch.group(1)
+            product_item['ItemDescription'] = strong_content
+        else:
+            print("No match found")
+        for index, metadata in enumerate(metadatalist):
+            ProductExtendedDetails = metadata.css("::text").get()
+            # print(ProductExtendedDetails)
+            if ProductExtendedDetails:
+                # Dynamically create metadata keys based on the iteration index
+                metadata_key = f'MetaData{index + 1}'
+                # Use the created item class
+                
+                # Set the metadata value in the item
+                product_item[metadata_key] =ProductExtendedDetails
+        # for metadata in metadatalist:
+
+        #     metadatatext = metadata.css("::text").get()
+        # 
+
+        # # Use re.search to find the match
+        # match = re.search(pattern, metadatafit)
+
+        # # Extract the content inside the <strong> tags if a match is found
+        # if match:
+        #     strong_content = match.group(1)
+        #     product_item['ItemDescription'] = match
+        # else:
+        #     print("No match found")
+        script_content = response.xpath('//script[@id="back-in-stock-helper"]/text()').get()
+        if script_content:
+            # Step 3: Use Regex to Extract JSON
+            json_pattern = re.compile(r'_BISConfig\.product\s*=\s*(\{.*?\});', re.DOTALL)
+            match = json_pattern.search(script_content)
+            
+            if match:
+                json_data = match.group(1)
+                # self.log(f'Extracted JSON: {json_data}')
+
+                image_pattern = re.compile(r'"media":\s*(\[[^\]]*\])')
+
+                # Search for the pattern in the JSON data
+                image_match = image_pattern.search(json_data)
+                image = ""
+                matching_images = []
+                # actualimage =""
+                if image_match:
+                    media_value_str = image_match.group(1)
+                    media_value = json.loads(media_value_str)
+                    for media_item in media_value:
+                        if media_item.get("alt") == colour:
+                            matching_images.append(media_item.get("src"))
+                        
+
+                    actualimage = f"https:{matching_images[-2]}"
+                    # print(actualimage)
+                    product_item['image_urls'] =actualimage
+                    
+                    # if media_value.get([{}],"alt") == colour:
+                    #     print("done value")
+                        # image = media.get("src")
+                        # print(image)
+
+                # with open(output_file, 'w', encoding='utf-8') as f:
+                #     json.dump(product_data, f, ensure_ascii=False, indent=4)
+                
+                # self.log(f'Successfully wrote product data to {output_file}')
+
+                # images_pattern = r'"media": \[(\{[^]]*\})\]'
+                # images_matches = re.search(images_pattern, product_data)
+                # if images_matches:
+                #     print(images_matches)
+                # else:
+                #     print("Media array not found.")
+
+# Search for the pattern in the API response
+        
+        
+            
+        # print(f"categoryname: {categoryname}, subcategoryname : {SubcategoryName}, productprice : {productprice}, colour: {colour}, productname : {productname}")
+        # Itemname = response.meta['itemname']
         # ItemPrice = response.meta['itemprice']
         # product_price_json = None
         # pricecontent  = response.xpath('//script[contains(., "window.asos.pdp.config.stockPriceResponse")]/text()').get()
@@ -440,6 +651,9 @@ class DataStoreSpider(scrapy.Spider):
         #         product_item['image_urls'].append(imageURL)
         #     # image_urls = [image.get('url') for image in product_images]
         # print(product_item)
+        if product_item not in product_item_list:
+            product_item_list.append(product_item)  # Add the new product_item to the list
+            yield product_item
         # yield product_item
         # gender = prodULRdata.get('gender')
         # print(productbrandName)
@@ -459,10 +673,10 @@ class DataStoreSpider(scrapy.Spider):
         # ProductSizes = []
         # ProductSizes = response.css()
         # print(response)
-        filename = 'html_content_itempage.html'
-        with open(filename, 'wb') as f:
-            f.write(response.body)
-        self.log(f'Saved HTML content to {filename}')
+        # filename = 'html_content_itempage.html'
+        # with open(filename, 'wb') as f:
+        #     f.write(response.body)
+        # self.log(f'Saved HTML content to {filename}')
         #  
         # ItemTitle = response.css("h1.jcdpl::text").get()
         # itemPrice = response.css("span.MwTOWl::text").get()
@@ -554,3 +768,4 @@ class DataStoreSpider(scrapy.Spider):
                     category_item['Subcategories'].append(subcat_item)
 
         yield category_item
+

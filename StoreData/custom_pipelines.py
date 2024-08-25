@@ -15,17 +15,19 @@ class CustomImagesPipeline(ImagesPipeline):
         # subcategory_title = item['Subcategories'][0]['subcategoryTitle']
         # yield scrapy.Request(item['categoryImage'],  self.process_item, meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': subcategory_title})
         # For the image_urls inside productItems
-        if 'image_urls' in item:
-            for image_url in item['image_urls']:
-        # for product in item['ProductItem']:
-            # image_url = product['image_urls']
-                print(f"my image url: {image_url}")
-                yield scrapy.Request(image_url , meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']})
+        # if 'image_urls' in item:
+        print(item["image_urls"])
+        yield scrapy.Request(item["image_urls"] , meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle']})
+        #     for image_url in item['image_urls']:
+        # # for product in item['ProductItem']:
+        #     # image_url = product['image_urls']
+        #         print(f"my image url: {image_url}")
+                # yield scrapy.Request(image_url , meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle']})
                 # meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
                 # ,meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
                 # yield scrapy.Request(image_url,meta={'ItemTitle': item['ItemTitle']} )
-        else:
-            print("no imageurl found")
+        # else:
+        #     print("no imageurl found")
         # Need this code later <> Original Code
         # if 'image_urls' in item:
         #     print(" I was here")

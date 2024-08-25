@@ -1,0 +1,19 @@
+apiVersion: cloud-build-notifiers/v1
+kind: SlackNotifier
+metadata:
+  name: slack-notifier
+spec:
+  notification:
+    filter: build.status == Build.Status.SUCCESS
+    params:
+      buildStatus: $(build.status)
+    delivery:
+      webhookUrl:
+        secretRef: SLACK_WEBHOOK_URL
+    template:
+      type: golang
+      uri: gs://flowy_store_images/slack.json
+  secrets:
+    - name: webhook-url
+      value: projects/atomic-dahlia-420120/secrets/SLACK_WEBHOOK_URL/versions/latest
+

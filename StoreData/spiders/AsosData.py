@@ -69,6 +69,7 @@ class DataStoreSpider(scrapy.Spider):
     name = "Asosstore-spider"
     homeURL = "https://www.asos.com/"
     subcat_item = SubcategoryItem()
+    processed_urls = set()
     cookies = {
         'browseCountry':'AE',
         'browseCurrency':'AED',
@@ -131,7 +132,7 @@ class DataStoreSpider(scrapy.Spider):
         """
     
         categoryname = response.meta['CategoryName']
-        offsetvalue= 0
+        # offsetvalue= 0
         subcategoryNavigation = response.css("div.x_RqXmD > div.EsGFLPm:nth-of-type(2) > div[data-testid='secondarynav-container'] > div.M8Zxf1o > div[data-testid='secondarynav-flyout']  > div.ZAntzlZ.MV4Uu8x > ul.c2oEXGw > li")
         #goes through all the list items and extracts subcategories within the clothing item sublist
         for li in subcategoryNavigation:
@@ -155,7 +156,7 @@ class DataStoreSpider(scrapy.Spider):
                     # print(itemsURL)
 
                 # if subcategorylink and subcategorylink != '#':
-                    yield scrapy.Request(url= itemsURL, cookies = self.cookies, callback= self.parse_offsetvalueinputter, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname , 'catgoryid' : cid_value, 'offset' : offsetvalue })
+                    yield scrapy.Request(url= itemsURL, cookies = self.cookies, callback= self.parse_offsetvalueinputter, meta={'categoryname': categoryname , 'subcategoryname': subcategoryname , 'catgoryid' : cid_value, 'offset' : 0 })
 
     def parse_offsetvalueinputter(self, response):
         # print(response.url)
@@ -166,24 +167,30 @@ class DataStoreSpider(scrapy.Spider):
         json_data = json.loads(response.body)
         product_data = json_data.get('products', [])
         itemcount= json_data.get('itemCount')
+        
         print(f"following is the data{product_data}")
         for product in product_data:
             # print("ive gotten here")
             itemname = product.get('name')
             print(f"following are the itemnames{itemname}")
+            product_url = product.get('url')
+            actualproduct_url = f"{self.homeURL}/{product_url}"
             product_price = product.get('price', {}).get('current', {}).get('text')
             print(f"following are the prices for the items{product_price}")
-            if offset+200 < itemcount:
+            if actualproduct_url not in self.processed_urls:
+                self.processed_urls.add(actualproduct_url)  # Add URL to the set
+                print(f"Following are the item names: {itemname}")
+                print(f"Following are the prices for the items: {product_price}")
+                yield scrapy.Request(url= actualproduct_url, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'product_price':product_price,  'subcategoryname': subcategoryname, 'categoryname': category})
+        if offset+200 < itemcount:
                 new_offset = offset+200
                 new_url = f"https://www.asos.com/api/product/search/v2/categories/{id}?offset={new_offset}&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
                 yield scrapy.Request(new_url, callback=self.parse_offsetvalueinputter, meta={'offset': new_offset, 'catgoryid': id, 'categoryname': category, 'subcategoryname': subcategoryname})
-
         # Regardless of the offset condition, callback to another function
         # actual_url = f"https://www.asos.com/api/product/search/v2/categories/{category}?offset=200&includeNonPurchasableTypes=restocking&key-search-mvtid=928254-web-plp-fh-baseline-ranking-cocktail&store=ROW&lang=en-GB&currency=AED&rowlength=2&channel=mobile-web&country=AE&keyStoreDataversion=q1av6t0-39&limit=200"
         # yield scrapy.Request(url=actual_url, cookies=self.cookies, callback=self.parse_individual_item_details, meta={'categoryname': category, 'subcategoryname': subcategoryname, 'itemcount': item_count})
-            product_url = product.get('url')
-            actualproduct_url = f"{self.homeURL}/{product_url}"
-            yield scrapy.Request(url= actualproduct_url, cookies = self.cookies, callback= self.parse_itempage, meta={'itemname': itemname, 'product_price':product_price,  'subcategoryname': subcategoryname, 'categoryname': category})
+            
+           
         # try:
         #     data = json.loads(response.body)
         #     itemcount= data.get('itemCount')
@@ -424,10 +431,11 @@ class DataStoreSpider(scrapy.Spider):
         for image in productimages:
             imageURL = image.get('url')
             if imageURL:
-                product_item['image_urls'].append(imageURL)
-                break
+                print(imageURL)
+                # product_item['image_urls'].append(imageURL)
+                # break
             # image_urls = [image.get('url') for image in product_images]
-        print(product_item)
+        # print(product_item)
         # yield product_item
         # gender = prodULRdata.get('gender')
         # print(productbrandName)
