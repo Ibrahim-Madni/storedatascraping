@@ -59,9 +59,9 @@ class DataStoreSpider(scrapy.Spider):
     name = "logoimages"
     allowed_domains = ["gettyimages.com"]
 
-    homeURL = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular"
+    homeURL = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular"
     subcat_item = SubcategoryItem()
-    product_api_url = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular"
+    product_api_url = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular"
     
     # custom_headers = {
     # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
@@ -123,7 +123,7 @@ class DataStoreSpider(scrapy.Spider):
         # Define a URL for an external IP address checker service
         
         # for page in range(1, 35):
-        url = 'https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular'
+        url = 'https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular'
         # Make a request to the external service
         yield scrapy.Request(url, self.CustomRequest)
     #parsing level 1 categories
@@ -170,17 +170,19 @@ class DataStoreSpider(scrapy.Spider):
 
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
+        print(response.url)
         # gallery-items-container
         # for imageURLS in response.css("div[data-testid='gallery-items-container']"):
         image_urls = []
-        # imagereferenceLinks = response.css("a > figure > picture > img::attr(src)").getall()
-        nextpageurl = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular&page=2"
+            # imagereferenceLinks = response.css("a > figure > picture > img::attr(src)").getall()
+        # https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular
+        nextpageurl = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular&page=2"
         gallerycont = "a > figure > picture > img"
         for gallery in response.css(gallerycont):
             imagereferenceLinks = gallery.css("::attr(src)").get()            
             if imagereferenceLinks:
                 image_urls.append(imagereferenceLinks)
-            # print(image_urls)
+                    # print(image_urls)
         
         yield  scrapy.Request(url= nextpageurl, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
     
@@ -201,8 +203,8 @@ class DataStoreSpider(scrapy.Spider):
             if imagereferenceLinks:
                 image_urls.append(imagereferenceLinks)
 
-        for page in range(31, 60):
-            productURL = f"https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular&page={page}"
+        for page in range(3, 63):
+            productURL = f"https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular&page={page}"
             # print(image_urls_next)
             yield  scrapy.Request(url= productURL, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
         product_item['image_urls']=image_urls

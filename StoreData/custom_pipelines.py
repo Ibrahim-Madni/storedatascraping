@@ -8,34 +8,11 @@ import logging
 import hashlib
 class CustomImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
-        print("    \n"*4)
-        print(item)
-        # This method is called for each item with 'image_urls' field
-        # print(f"my image url: {item['categoryImage']}")
-        # subcategory_title = item['Subcategories'][0]['subcategoryTitle']
-        # yield scrapy.Request(item['categoryImage'],  self.process_item, meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': subcategory_title})
-        # For the image_urls inside productItems
-        # if 'image_urls' in item:
-        print(item["image_urls"])
-        yield scrapy.Request(item["image_urls"] , meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle']})
-        #     for image_url in item['image_urls']:
-        # # for product in item['ProductItem']:
-        #     # image_url = product['image_urls']
-        #         print(f"my image url: {image_url}")
-                # yield scrapy.Request(image_url , meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle']})
-                # meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
-                # ,meta={'category_title': item['categoryName'], 'subcategoryTitle': item['SubcategoryName']}
-                # yield scrapy.Request(image_url,meta={'ItemTitle': item['ItemTitle']} )
-        # else:
-        #     print("no imageurl found")
-        # Need this code later <> Original Code
-        # if 'image_urls' in item:
-        #     print(" I was here")
-        #     for image_url in item['image_urls']:
-        #         print(f"my image url:{image_url}")
-        #         subcategory_title = item['Subcategories'][0]['subcategoryTitle']
-        #         # print(subcategory_title)
-        #         yield scrapy.Request(image_url, meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': subcategory_title})
+        # print(item)
+        for image_url in item['image_urls']:
+
+            yield scrapy.Request(image_url )
+        # meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle'], 'productcolourID': item.get('ItemColour')}
     def process_item(self, item, spider):
         print(" I was here")
         logging.info(f"Item reached CustomImagesPipeline: {item}")
@@ -55,13 +32,16 @@ class CustomImagesPipeline(ImagesPipeline):
         return super().item_completed(results, item, info)
     def file_path(self, request, response=None, info=None, *, item=None):
         print("Processing item in CustomImagesPipeline")
-        category = request.meta.get('category_title', 'default_category')
-        subcategory = request.meta.get('subcategoryTitle', 'default_subcategory')
+        # category = request.meta.get('category_title', 'default_category')
+        # subcategory = request.meta.get('subcategoryTitle', 'default_subcategory')
         # itemname = request.meta.get('ItemTitle')
-        # Construct the filename using category and subcategory
+        # productcolourID = request.meta.get('productcolourID', 'default_id')
+
+    # Construct a more specific path using product or color information
+    
         image_name = os.path.basename(urlparse(request.url).path)
     # Construct the path using category, subcategory, and original filename
-        path = os.path.join(category, subcategory,  image_name)
+        path = os.path.join('Dior',  image_name)
         print(f"Saving to path: {path}")
         return path
         # filename = f"{category}_{subcategory}.jpg"
