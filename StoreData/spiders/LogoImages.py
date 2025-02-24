@@ -1,6 +1,7 @@
 import scrapy
 import json
 import re
+import csv
 from scrapy.crawler import CrawlerProcess
 from scrapy_splash import SplashRequest 
 from scrapy.pipelines.images import ImagesPipeline
@@ -57,11 +58,11 @@ class ProductItem(scrapy.Item):
 
 class DataStoreSpider(scrapy.Spider):
     name = "logoimages"
-    allowed_domains = ["gettyimages.com"]
+    allowed_domains = ["gettyimages.com", "https://www.gettyimages.com/", "www.gettyimages.com/", "localhost"]
 
-    homeURL = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular"
+    homeURL = "https://www.gettyimages.com"
     subcat_item = SubcategoryItem()
-    product_api_url = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular"
+    product_api_url = "https://www.gettyimages.com/search/2/image-film?phrase=Lululemon%20logo&sort=best"
     
     # custom_headers = {
     # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
@@ -123,9 +124,9 @@ class DataStoreSpider(scrapy.Spider):
         # Define a URL for an external IP address checker service
         
         # for page in range(1, 35):
-        url = 'https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular'
+        url = 'https://www.gettyimages.com/search/2/image?phrase=apple%20logo&family=editorial'
         # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+        yield SplashRequest(url, self.CustomRequest)
     #parsing level 1 categories
     # def parse(self, response):
 
@@ -170,43 +171,82 @@ class DataStoreSpider(scrapy.Spider):
 
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
-        print(response.url)
+        # print(response.url)
         # gallery-items-container
         # for imageURLS in response.css("div[data-testid='gallery-items-container']"):
-        image_urls = []
+        product_item = response.meta.get('item', ProductItem())
+
+        # image_urls = []
             # imagereferenceLinks = response.css("a > figure > picture > img::attr(src)").getall()
         # https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular
-        nextpageurl = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular&page=2"
-        gallerycont = "a > figure > picture > img"
+        # nextpageurl = "https://www.gettyimages.com/search/2/image-film?phrase=uniqlo%20logo&sort=best&page=2"
+        nextpageurl = response.css("a[data-testid='pagination-button-next']::attr(href)").get()
+        if nextpageurl:
+            completenextpageurl = f"{self.homeURL}{nextpageurl}"
+        else:
+            completenextpageurl = None
+        # completenextpageurl = f"{self.homeURL}{nextpageurl}"
+        gallerycont = "div[data-testid = 'gallery-items-container'] > div.vItTTzk8rQvUIXjdVfi4"
+
         for gallery in response.css(gallerycont):
-            imagereferenceLinks = gallery.css("::attr(src)").get()            
-            if imagereferenceLinks:
-                image_urls.append(imagereferenceLinks)
-                    # print(image_urls)
+            print(gallery)
+            imagereferenceLinks = gallery.css("article.KMczDbsqNlj9Y2shxCNZ > a > figure > picture > img::attr(src)").get()            
+            # print(imagereferenceLinks)
+        #     if imagereferenceLinks:
+                
+        #         product_item.setdefault('image_urls', []).append(imagereferenceLinks)
+        #         # numberofproductitemsperpage = len(product_item['image_urls'])
+        #         # print(f"The total number of product items per page are {numberofproductitemsperpage}")
+        #             # print(product_item)
+        # if completenextpageurl:
+
+        #     yield scrapy.Request(completenextpageurl, callback=self.CustomRequest, meta={'item': product_item})
+        # else:
+        #     # numberofproductitems = len(product_item['image_urls'])
+        #     # print(f"The total number of product items are {numberofproductitems}")
+            
+
+        #     yield(product_item)
+        #     # with open('output_file.csv', 'a', newline='') as f:
+            #     writer = csv.writer(f)
+            # If needed, write headers (only once, outside of loop)
+            # writer.writerow(product_item.keys())
+            
+            # Write the values for each product item
+                # writer.writerow(product_item.values())
         
-        yield  scrapy.Request(url= nextpageurl, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
+        # print(product_item)
+        
+            # print(product_item)
+            # yield product_item
+                
+                # image_urls.append(imagereferenceLinks)
+                # print(image_urls)
+        
+        # yield  scrapy.Request(url= completenextpageurl, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
     
     def parse_nextpageimages(self, response):
         print(response.url)
-        product_item = ProductItem()
-        image_urls = response.meta.get('image_urls')
         # image_next_urls = response.meta.get('image_urls')
         # # print(image_urls
         # image_urls_next=[]
         # image_urls_next.append(image_urls)
         # image_urls_next.append(image_next_urls)
-        gallerycontainer = "a > figure > picture > img"
-        for gallery in response.css(gallerycontainer):
-            imagereferenceLinks = gallery.css("::attr(src)").get()
-            # print(imagereferenceLinks)
-        # nextpageurl = "https://www.gettyimages.com/search/2/image?family=editorial&phrase=hong%20kong%20%20flag%20&sort=mostpopular&page=2"
+        nextpageurl = response.css("a[data-testid='pagination-button-next']::attr(href)").get()
+        # print(nextpageurl)
+        completenextpageurl = f"{self.homeURL}{nextpageurl}"
+        gallerycont = "a > figure > picture > img"
+        for gallery in response.css(gallerycont):
+            imagereferenceLinks = gallery.css("::attr(src)").get()            
             if imagereferenceLinks:
                 image_urls.append(imagereferenceLinks)
+                # print(image_urls)
 
-        for page in range(3, 63):
-            productURL = f"https://www.gettyimages.com/search/2/image?family=editorial&phrase=dior%20brand%20logo&sort=mostpopular&page={page}"
-            # print(image_urls_next)
-            yield  scrapy.Request(url= productURL, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
+        # for page in range(3, 9):
+        #     productURL = f"https://www.gettyimages.com/search/2/image-film?phrase=uniqlo%20logo&sort=best&page={page}"
+        #     # print(image_urls_next)
+            if nextpageurl:
+                yield  scrapy.Request(url= completenextpageurl, callback= self.parse_nextpageimages ,meta={'image_urls': image_urls})
         product_item['image_urls']=image_urls
         # print(product_item)
         yield(product_item) 

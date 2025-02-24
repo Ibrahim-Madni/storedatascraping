@@ -58,8 +58,8 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "zara-store"
-    homeURL = "https://www.clickfunnels.com/"
+    name = "curemdscraper"
+    homeURL = "https://www.zara.com/ae/en/"
     subcat_item = SubcategoryItem()
     product_api_url = "https://www.zara.com/ae/en/category"
     
@@ -74,52 +74,52 @@ class DataStoreSpider(scrapy.Spider):
     # ... any other headers you want to include ...
     # }
 
-    custom_cookies = {
-        '__Secure-1PAPISID': '6wl3847Xx2qcWqlY/AsU77BmANv5IW123L',
-        '__Secure-3PSID': 'g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076',
-        'n_user': 's%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCToken%22%3A%224277683698%252Cyn5Pr7QgxswLauy8IUxXVudZ9yZMDAfJUojXpKz67DrN45KoKh6zc2gAdymqprOvYFkyl80CepKtuO4l9ckwCPByUt8aLC7bxfyQgZ0r7uTFB7VRbiH9P5DcqjjdEohaeA6mGrd3hh6kXmKmnRPqunKxUqRNlmx0SQotgQX6XG8487UZ%252FR1er7%252F6QTahmOX7tE2RsDzrOfcdIcXPH%252FEpoGtcfPqTxCyMu%252FPu4X%252BuJng%253D%22%2C%22kind%22%3A%22persistent%22%2C%22storeId%22%3A22701%7D.C0tesDdRoprxSsbUiEfwkaQXZ5rnsVFJoHrVHRLD8GU',
-        'n_suser': 's%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCTrustedToken%22%3A%224277683698%252CvtnI2d2PMb2rqU1Us02rXkUaI%252FtcTzjEpLzH1Rn0UXU%253D%22%7D.y9PXx%2BmsV7eVJ5s9vbKRBL4KD8FZnsN8bD5NViGHk2E',
-        'NID': '513=Nzcip1nKNsM8XxmOwy952t9UxMLNSL-5N50K_3XdkJXkrpQbsdnLkzJDiIwvxHMhM9MD9n8D-gAQI2oVicT9tQYzIcemypJcHhRoaoo7ssopMnE4qqqBFNIZ2fPKXx00WV7QnbrYx2l0baoxBb6Lt01PGnQm6Orf0M2QpLcDomFKw3m-SBWKl6M',
-        # 6wl3847Xx2qcWqlY/AsU77BmANv5IW123L
-        # s%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCToken%22%3A%224277683698%252Cyn5Pr7QgxswLauy8IUxXVudZ9yZMDAfJUojXpKz67DrN45KoKh6zc2gAdymqprOvYFkyl80CepKtuO4l9ckwCPByUt8aLC7bxfyQgZ0r7uTFB7VRbiH9P5DcqjjdEohaeA6mGrd3hh6kXmKmnRPqunKxUqRNlmx0SQotgQX6XG8487UZ%252FR1er7%252F6QTahmOX7tE2RsDzrOfcdIcXPH%252FEpoGtcfPqTxCyMu%252FPu4X%252BuJng%253D%22%2C%22kind%22%3A%22persistent%22%2C%22storeId%22%3A22701%7D.C0tesDdRoprxSsbUiEfwkaQXZ5rnsVFJoHrVHRLD8GU
-        '__Secure-3PAPISID': '6wl3847Xx2qcWqlY/AsU77BmANv5IW123L',
-        # g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076
-        # g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076
-        'ITXSESSIONID': '94acc0613fee90a7b7afba631dd89b3f',
-        'ITXDEVICEID': 'f2eadf2c76b22575b28a033021b39c09',
-        'JSESSIONID': '0000DTTHQxHaivMpJv29qYOT5r7:2aa2asqcy',
-        'IDROSTA':'3b3254b170c7:238e05f99f6b22abeef6e4f7f',
-        # 'TS0122c9b6': '0165eae04fc090d4fe65bca4057abde3ccc21430644075c7bec7abbbf535e5f6e7c712b836e7e246ee94c25933a9aeff2cbaf087cd',
-        # 'bm_sv': '74BCAEBA6F7F769BFFECEE40EE04897E~YAAQZR0gF5AcbgKPAQAAAu2QGBfGq5x0IDBARj3ltiK6qCBVDTJT7x8AeZ43hx7nmAO9JE90SK3wkeNlel6FTv0FdR0p0kkkzT/Tp97NFc7fk+wyPT/IcHGRtT9UTRnWdVPntwOThtxjg7Uw43S6W5jX759gPn5IgYwJZQkMPE69GRrRJ3ie1B94upEzfVX9PfER75zKXkQPJxXnUZacKehm6eLy2FAPC4iGVabykwmsGP/QSF202k3yzJHhFAU=~1'
-    }
-    new_cookies = {
-        'usn_visitor_id': '3d9b1702a4f601008b21bb66f50000003a280000',
-        'OTGPPConsent': 'DBABLA~BVQqAAAACgA.QA',
-        '_sharedid': 'f6c14874-c276-4fef-99e2-3dbdba4dbcd2',
-        '_sharedid_cst': 'zix7LPQsHA%3D%3D',
-        'usn_bot': 'ab986e8474d899cfd17743c422756311',
-        'usn_session_id': '26752857852529728',
-        'cogv': 'health',
-        '_abck': '7FF34998C91CFE851B25E01E0C0CD333~-1~YAAQXZ42F7n23OCRAQAAP0fhDQypy2Il/R5Haq9RLLYjVoYLxJE3WB8ZhdP3LwPTBwAfAm740MZ2IN/stirb8J/BdIwS0NKD3aCIoZ9RUb2ht62r6TzWRshtXN4rgGH1wpVavyfC1gk4JH/9mYV9NkIBee/pOlPzSKmws3KUZeNE9II5GdwbMnWU5osoB8L8BgzCbdO41v5vkI3h82soJ24X1ZjQiP3//OKibrXXCvtoiAapWTEdLYXM7dTp3huwuwhL2JTHhtOTDMzNtSB1YmQQww4AYCWLdKOdZxhL+EJVA2jlsYKfcSWMAY4+bmqE8ZX/i50Vd3VuVi6rSAz31SrKopQkF+hVRQMrtxdmsfSNATUgJxk/mQnnunoUp4FblaLM4+K4Mr+0FA==~-1~-1~-1',
-        'bm_mi': 'DDAE42EC37C8BE5F4114ACA15F0CF9B3~YAAQXZ42F3Av3eCRAQAAmlXnDRn86j58Lva7CYW4XfSORE1+1QWW1sI7kvGj0Qy5gOpVVzAiGq+zoP1xr9pW1Tlg7OcFWgwscEnZPEg1ribiSNZ8ux5zW7Yn0tCaQQ3UVWId2aVN0Syvcfpa6n5rynPPlDi4aS7XLsmqqKZ2xkAVwAKQ1ND6u9xLrnt23pd2sEljpYs0oa6PFqnYeaJujWMm7KhK/tUpW4t4qzZ+SL1F8JwestNB9SM+baCuCu1nbO9BPg1d2jsMxQozF2u+7uCYqJHRQF8WW93QOn0DpUn6EmptbMDFh60/LOwVpFHqzJiLZImBXow9EKo0AsY83EFM4JTs7mrLE9JY9aY=~1',
-        'ak_bmsc': 'C049DDA613B0054695F78D1BA8167EF9~000000000000000000000000000000~YAAQU542F70iKe2RAQAA5lQPDhn077H6HhdKKix+pxM39UG3edEjIK4hEuOheDJInwtDWt7IXv9ui7O9FepFE2ATJF0cbuTBD6brO7kVrUvJnKv67BH/O8U4X4hJ0La9odxmkNLz42UozYxUMJV8e6XQ+90/oY7/iR0fo02aeQ6vnKeKSgZCE2CwT8xoiMbNYw0UwPm6StEUI+RqgNUQeB/TM+g+AWGBpRfOVFqcWwcBh6edrIW/ReBHishPxak3v+02QSPNQU40vy0i/IM5Rqpmdz/tMsEhXzvNe4HgODD2xxDClGIrGovldF9FB/VU31NrVm8popsylkOzToQYn4ImTrd3OKlQaa3J1CQSu/C/oB1EXXdjaADPjWRsx4IbmAmakKwaEtO0WuAG/plVCoEINUiz0H6REOxqlnZj5kpAVl1h2pV5IOISvoN5Lk4bcIBJhMgPHglce3Ialr+1X+s=',
-        'SEARCH_SAMESITE':	'CgQIg5wB',	
-'SID' :	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1em3xxCqEEaxvLQpewLxJ6gACgYKAQYSARESFQHGX2MiyT-I6-dRxvzblYMOwq1svBoVAUF8yKrXLOSHuCGAZHhMWUtItz2I0076',	
-'SIDCC' :	'AKEyXzWFB86TX0Bg8vXSCu_4oPJ7w_I-HvvPMDHE1pbkZF8L9HjEJWedhqJ6QnKrfl3HM_uGeP8'	,
-'SMSV' :	'ADHTe-C37StV7-3QVx78wI_E30I6f9hdkchN47J9MEPwWFMblFwSjRB4SlLOdjtvToH1QZTgAmmUzo4EP0S-CX97Y0ZsPF0XfmQWX7p9pcAqHKAC1rArY0k',	
-'SSID' :	'AOcj_ApoeZxsc5A4O',			
-'__Secure-1PAPISID':	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',	
-'__Secure-1PSID':	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1g9q32OlQrRgAofcNxSF1-gACgYKAcMSARESFQHGX2Mikf2MI2EbmA5DjwHrNLk2XBoVAUF8yKq97MjjFlHLTcRVDp2ZvHJX0076',	
-'__Secure-1PSIDCC' :	'AKEyXzXVefKJPPeGGFiOqTDTqQacB-c6vK8YTkEm9VNPNPYIluXTcBVc8HbcSpqVVTA70akGvQ',
-'__Secure-1PSIDTS' :	'sidts-CjEBQlrA-LapsRT0_1uDfTWmcqwB5p8iXrvypXvHSxH4dqcDcydbZxm6T4E0s4dFwd30EAA',		
-'__Secure-3PAPISID' :	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',
-'usn_bot':	'c8379024141b5d6c256145540813d116',
-'usn_bot':	'e0c911a05f9945af45cae7211bdeb439',		
-'usn_bot' :	'ab986e8474d899cfd17743c422756311',	
-'usn_session_id': 	'26752857852529728'	,
-'usn_visitor_id' :	'3d9b1702a4f601008b21bb66f50000003a280000',		
-'utag_main	v_id':'01914afb08f200028d2',
-    }
+#     custom_cookies = {
+#         '__Secure-1PAPISID': '6wl3847Xx2qcWqlY/AsU77BmANv5IW123L',
+#         '__Secure-3PSID': 'g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076',
+#         'n_user': 's%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCToken%22%3A%224277683698%252Cyn5Pr7QgxswLauy8IUxXVudZ9yZMDAfJUojXpKz67DrN45KoKh6zc2gAdymqprOvYFkyl80CepKtuO4l9ckwCPByUt8aLC7bxfyQgZ0r7uTFB7VRbiH9P5DcqjjdEohaeA6mGrd3hh6kXmKmnRPqunKxUqRNlmx0SQotgQX6XG8487UZ%252FR1er7%252F6QTahmOX7tE2RsDzrOfcdIcXPH%252FEpoGtcfPqTxCyMu%252FPu4X%252BuJng%253D%22%2C%22kind%22%3A%22persistent%22%2C%22storeId%22%3A22701%7D.C0tesDdRoprxSsbUiEfwkaQXZ5rnsVFJoHrVHRLD8GU',
+#         'n_suser': 's%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCTrustedToken%22%3A%224277683698%252CvtnI2d2PMb2rqU1Us02rXkUaI%252FtcTzjEpLzH1Rn0UXU%253D%22%7D.y9PXx%2BmsV7eVJ5s9vbKRBL4KD8FZnsN8bD5NViGHk2E',
+#         'NID': '513=Nzcip1nKNsM8XxmOwy952t9UxMLNSL-5N50K_3XdkJXkrpQbsdnLkzJDiIwvxHMhM9MD9n8D-gAQI2oVicT9tQYzIcemypJcHhRoaoo7ssopMnE4qqqBFNIZ2fPKXx00WV7QnbrYx2l0baoxBb6Lt01PGnQm6Orf0M2QpLcDomFKw3m-SBWKl6M',
+#         # 6wl3847Xx2qcWqlY/AsU77BmANv5IW123L
+#         # s%3Aj%3A%7B%22userId%22%3A4277683698%2C%22userToken%22%3A%22QWpQjtHVCEy5Y0Dq7AqNYdbzTjlqfNO4KhxjW%2FoCLnI%3D%22%2C%22WCToken%22%3A%224277683698%252Cyn5Pr7QgxswLauy8IUxXVudZ9yZMDAfJUojXpKz67DrN45KoKh6zc2gAdymqprOvYFkyl80CepKtuO4l9ckwCPByUt8aLC7bxfyQgZ0r7uTFB7VRbiH9P5DcqjjdEohaeA6mGrd3hh6kXmKmnRPqunKxUqRNlmx0SQotgQX6XG8487UZ%252FR1er7%252F6QTahmOX7tE2RsDzrOfcdIcXPH%252FEpoGtcfPqTxCyMu%252FPu4X%252BuJng%253D%22%2C%22kind%22%3A%22persistent%22%2C%22storeId%22%3A22701%7D.C0tesDdRoprxSsbUiEfwkaQXZ5rnsVFJoHrVHRLD8GU
+#         '__Secure-3PAPISID': '6wl3847Xx2qcWqlY/AsU77BmANv5IW123L',
+#         # g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076
+#         # g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076
+#         'ITXSESSIONID': '94acc0613fee90a7b7afba631dd89b3f',
+#         'ITXDEVICEID': 'f2eadf2c76b22575b28a033021b39c09',
+#         'JSESSIONID': '0000DTTHQxHaivMpJv29qYOT5r7:2aa2asqcy',
+#         'IDROSTA':'3b3254b170c7:238e05f99f6b22abeef6e4f7f',
+#         # 'TS0122c9b6': '0165eae04fc090d4fe65bca4057abde3ccc21430644075c7bec7abbbf535e5f6e7c712b836e7e246ee94c25933a9aeff2cbaf087cd',
+#         # 'bm_sv': '74BCAEBA6F7F769BFFECEE40EE04897E~YAAQZR0gF5AcbgKPAQAAAu2QGBfGq5x0IDBARj3ltiK6qCBVDTJT7x8AeZ43hx7nmAO9JE90SK3wkeNlel6FTv0FdR0p0kkkzT/Tp97NFc7fk+wyPT/IcHGRtT9UTRnWdVPntwOThtxjg7Uw43S6W5jX759gPn5IgYwJZQkMPE69GRrRJ3ie1B94upEzfVX9PfER75zKXkQPJxXnUZacKehm6eLy2FAPC4iGVabykwmsGP/QSF202k3yzJHhFAU=~1'
+#     }
+#     new_cookies = {
+#         'usn_visitor_id': '3d9b1702a4f601008b21bb66f50000003a280000',
+#         'OTGPPConsent': 'DBABLA~BVQqAAAACgA.QA',
+#         '_sharedid': 'f6c14874-c276-4fef-99e2-3dbdba4dbcd2',
+#         '_sharedid_cst': 'zix7LPQsHA%3D%3D',
+#         'usn_bot': 'ab986e8474d899cfd17743c422756311',
+#         'usn_session_id': '26752857852529728',
+#         'cogv': 'health',
+#         '_abck': '7FF34998C91CFE851B25E01E0C0CD333~-1~YAAQXZ42F7n23OCRAQAAP0fhDQypy2Il/R5Haq9RLLYjVoYLxJE3WB8ZhdP3LwPTBwAfAm740MZ2IN/stirb8J/BdIwS0NKD3aCIoZ9RUb2ht62r6TzWRshtXN4rgGH1wpVavyfC1gk4JH/9mYV9NkIBee/pOlPzSKmws3KUZeNE9II5GdwbMnWU5osoB8L8BgzCbdO41v5vkI3h82soJ24X1ZjQiP3//OKibrXXCvtoiAapWTEdLYXM7dTp3huwuwhL2JTHhtOTDMzNtSB1YmQQww4AYCWLdKOdZxhL+EJVA2jlsYKfcSWMAY4+bmqE8ZX/i50Vd3VuVi6rSAz31SrKopQkF+hVRQMrtxdmsfSNATUgJxk/mQnnunoUp4FblaLM4+K4Mr+0FA==~-1~-1~-1',
+#         'bm_mi': 'DDAE42EC37C8BE5F4114ACA15F0CF9B3~YAAQXZ42F3Av3eCRAQAAmlXnDRn86j58Lva7CYW4XfSORE1+1QWW1sI7kvGj0Qy5gOpVVzAiGq+zoP1xr9pW1Tlg7OcFWgwscEnZPEg1ribiSNZ8ux5zW7Yn0tCaQQ3UVWId2aVN0Syvcfpa6n5rynPPlDi4aS7XLsmqqKZ2xkAVwAKQ1ND6u9xLrnt23pd2sEljpYs0oa6PFqnYeaJujWMm7KhK/tUpW4t4qzZ+SL1F8JwestNB9SM+baCuCu1nbO9BPg1d2jsMxQozF2u+7uCYqJHRQF8WW93QOn0DpUn6EmptbMDFh60/LOwVpFHqzJiLZImBXow9EKo0AsY83EFM4JTs7mrLE9JY9aY=~1',
+#         'ak_bmsc': 'C049DDA613B0054695F78D1BA8167EF9~000000000000000000000000000000~YAAQU542F70iKe2RAQAA5lQPDhn077H6HhdKKix+pxM39UG3edEjIK4hEuOheDJInwtDWt7IXv9ui7O9FepFE2ATJF0cbuTBD6brO7kVrUvJnKv67BH/O8U4X4hJ0La9odxmkNLz42UozYxUMJV8e6XQ+90/oY7/iR0fo02aeQ6vnKeKSgZCE2CwT8xoiMbNYw0UwPm6StEUI+RqgNUQeB/TM+g+AWGBpRfOVFqcWwcBh6edrIW/ReBHishPxak3v+02QSPNQU40vy0i/IM5Rqpmdz/tMsEhXzvNe4HgODD2xxDClGIrGovldF9FB/VU31NrVm8popsylkOzToQYn4ImTrd3OKlQaa3J1CQSu/C/oB1EXXdjaADPjWRsx4IbmAmakKwaEtO0WuAG/plVCoEINUiz0H6REOxqlnZj5kpAVl1h2pV5IOISvoN5Lk4bcIBJhMgPHglce3Ialr+1X+s=',
+#         'SEARCH_SAMESITE':	'CgQIg5wB',	
+# 'SID' :	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1em3xxCqEEaxvLQpewLxJ6gACgYKAQYSARESFQHGX2MiyT-I6-dRxvzblYMOwq1svBoVAUF8yKrXLOSHuCGAZHhMWUtItz2I0076',	
+# 'SIDCC' :	'AKEyXzWFB86TX0Bg8vXSCu_4oPJ7w_I-HvvPMDHE1pbkZF8L9HjEJWedhqJ6QnKrfl3HM_uGeP8'	,
+# 'SMSV' :	'ADHTe-C37StV7-3QVx78wI_E30I6f9hdkchN47J9MEPwWFMblFwSjRB4SlLOdjtvToH1QZTgAmmUzo4EP0S-CX97Y0ZsPF0XfmQWX7p9pcAqHKAC1rArY0k',	
+# 'SSID' :	'AOcj_ApoeZxsc5A4O',			
+# '__Secure-1PAPISID':	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',	
+# '__Secure-1PSID':	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1g9q32OlQrRgAofcNxSF1-gACgYKAcMSARESFQHGX2Mikf2MI2EbmA5DjwHrNLk2XBoVAUF8yKq97MjjFlHLTcRVDp2ZvHJX0076',	
+# '__Secure-1PSIDCC' :	'AKEyXzXVefKJPPeGGFiOqTDTqQacB-c6vK8YTkEm9VNPNPYIluXTcBVc8HbcSpqVVTA70akGvQ',
+# '__Secure-1PSIDTS' :	'sidts-CjEBQlrA-LapsRT0_1uDfTWmcqwB5p8iXrvypXvHSxH4dqcDcydbZxm6T4E0s4dFwd30EAA',		
+# '__Secure-3PAPISID' :	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',
+# 'usn_bot':	'c8379024141b5d6c256145540813d116',
+# 'usn_bot':	'e0c911a05f9945af45cae7211bdeb439',		
+# 'usn_bot' :	'ab986e8474d899cfd17743c422756311',	
+# 'usn_session_id': 	'26752857852529728'	,
+# 'usn_visitor_id' :	'3d9b1702a4f601008b21bb66f50000003a280000',		
+# 'utag_main	v_id':'01914afb08f200028d2',
+#     }
     # custom_cookies={
                     # 'ITXSESSIONID': '71fee5cda8aa57ee7427246d4bed66e1',
                     # 'IDROSTA' : '39d2489e0357:113b59487f4604207f79de7ce',
@@ -161,11 +161,130 @@ class DataStoreSpider(scrapy.Spider):
     #         yield item  
             
     def start_requests(self):
-        # Define a URL for an external IP address checker service
-        url = "https://www.clickfunnels.com/"
+    # Define the base URL for the authorization endpoint
+        base_url = "https://fhirsandbox.curemd.net/DEV/$export"
+        access_token = (
+            "eyJraWQiOiJzbWlsZWNkci1kZW1vIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI4ZWFkZmUwMy01YjVkLTRiOWQtYWRlNS00N2RhYWNjZjBlMDkiLCJpc3MiOiJmaGlyc21hcnRhdXRoc2FuZGJveC5jdXJlbWQubmV0Iiwic21pbGVfY2RyX21vZHVsZV9pZCI6InNtYXJ0X2F1dGhfc2FuZGJveCIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJuYmYiOjE3MzU4MzY3OTksImF6cCI6IjhlYWRmZTAzLTViNWQtNGI5ZC1hZGU1LTQ3ZGFhY2NmMGUwOSIsInNjb3BlIjoicGF0aWVudC8qLnJlYWQgc3lzdGVtLyoucmVhZCIsImZoaXJDb250ZXh0IjpbXSwic21pbGVfY2RyX25vZGVfaWQiOiJNYXN0ZXIiLCJleHAiOjE3MzU4NDAzOTksImlhdCI6MTczNTgzNjc5OSwianRpIjoiNDFlMjU0MGYtYTNiNS00M2QzLTlmNDItN2Y5NmNhZDgxZDMzIn0.eLNW493hEENVsjr6g8D_8jdrCWe_jNbXV3c1Um5O7tO3mEUGku6jpsxQapaxJFytbLSYYNbZTljAXX2z50tDpr_Pz9yFEQiSSYRF02Ql9y8NVU0Ay1cyQiMFCZaUmxMWT3ZzypnGPX0aYMubvJ1-O4Jp1A4le6rdHASCRzDyBMXonVjBlVjuXqga0X1dJa64_6_bWlXgfQEZk47hIuanm9AgSiQL4d7IpXRvo0jQ_vEr4LhKLO3ZsNWnu_DPR58h71lGLyuitSmRH6GrBoHBlekr_bJjLkF-IfQvoiozXcetjlIEu7lZ2Gl5HZ_MNP9kxW3_U0jZKirFpfIaAueUbg"
+        )
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Prefer" : "respond-async"
+            
+        }
+        # body = [
+        #     {
+        #         "startDate": 1734362480521,
+        #         "endDate": 1734362498567,
+        #         "features": {
+        #             "runtime-4535-bypass-history-create-permissions-in-app": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": True, "count": 15, "variation": 0, "version": 28}
+        #                 ]
+        #             },
+        #             "universe-1643-allow-request-send-in-public-workspace": {
+        #                 "default": {"isRequestSendAllowed": False, "publisherIds": []},
+        #                 "counters": [
+        #                     {
+        #                         "value": {
+        #                             "isRequestSendAllowed": True,
+        #                             "publisherIds": [
+        #                                 "72457", "1339093", "1806241", "6029", "3045751", 
+        #                                 "356847", "1339093", "1589616", "1096008", "3460167",
+        #                                 "4555279", "1861811", "5954744", "360997", "4192311",
+        #                                 "4061489","5080319","1748164","645405","1500617","2773318","414866","1593074","3809478","3832889","2331441","1833333","1382024","34425","470699","2898014","4640322","3319708","3813671","6171938","6342228","4977916","49096","5169898","266684","2694464","3444201","4169993","1893666","5094","6355157","4855828","341713","2521496","155554","319599","4354138","1479144","1113395","3376367","208228","329819","621949","375636","5505454","1886919","3521623","1186767","6307333","173382","3684419","3337444","4239614","3066151","1651561","6122318","4548826","1029024","3354809","5608005","1377835","461006","1363003","19647","3267897","5951419","2349580","4919424","35363","2877844","675208","711828","5006591","5316259","1241125","3124263","533947","3851707","6319382","869247","4710473","6312215","2216046","5282232","4556305","4640384","6234525","2897707","6322952","2266622","15248","3014675","1693625","1754043","4609399","2076709","1628301","5943436","5630198","5140685","1966780","6351785","5253009","2582542","1855711","4103913","2868409","5916465","6357886","5253660","1503042","126119","625106","325219","2940040","548358","6021178","4717972","3804157","3563995","626618","231873","4846098","171920","5647620","6279811","1475736","2570146","531382","3688194","6383318","4466005","6115247","5332367","4522571","6342448","4177195","6081493","1219488","1038846","2883653","5385828","607880","665923","2759911","202784","464235","6296628","2228853","4671580","4673276","6164637","4699599","1201159","1526223","4916078","3516915","4708440","637298","1592688","3776439","479120","4133845","5102404","5342253","3435433","5380491","1354402","142830","6149542","5979019","3300831","4023137","5938495","4192297","1020170","1186659","5535632","1359116","4756608","1128001","3370803","5518766","2628188","6241861","4240886","255866","1071777","1110183","357539","1829293","5111288","3938608","1411845","5701941","1532449","469446","3341758","4607010","273000","973415","1205750","1859055","3963241","5134650","5492743","3500476","4724666","5731802",
+        #                                 # Add more IDs here as necessary
+        #                             ]
+        #                         },
+        #                         "count": 5,
+        #                         "variation": 0,
+        #                         "version": 33
+        #                     }
+        #                 ]
+        #             },
+        #             "search-related-requests-url-bar": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": False, "count": 2, "variation": 1, "version": 34}
+        #                 ]
+        #             },
+        #             "http-2-request-alpn": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": False, "count": 1, "variation": 1, "version": 3}
+        #                 ]
+        #             },
+        #             "runtime-5780-dispose-parent-api-list-adapter": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": False, "count": 3, "variation": 1, "version": 7}
+        #                 ]
+        #             },
+        #             "apitest-584-enable-cloud-file-upload": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": True, "count": 1, "variation": 0, "version": 7}
+        #                 ]
+        #             },
+        #             "apitest-751-enable-package-library": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": True, "count": 1, "variation": 0, "version": 15}
+        #                 ]
+        #             },
+        #             "import_1234_interceptor_agent": {
+        #                 "default": False,
+        #                 "counters": [
+        #                     {"value": True, "count": 4, "variation": 0, "version": 18}
+        #                 ]
+        #             }
+        #         },
+        #         "kind": "summary"
+        #     }
+        # ]
+        
+        # Send POST request with headers and body
+        yield scrapy.Request(
+            url=base_url,
+            method="GET",
+            headers=headers,
+            # body=json.dumps(body),
+            callback=self.parse_response,
+            # dont_filter=True,
+            # meta={'url': base_url, 'headers': headers, 'body': body}
+        )
 
-        # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+    def render_lua_script(self):
+        # Define a Lua script to handle the GET request
+        return """
+        function main(splash, args)
+            splash:on_request(function(request)
+                request:set_header('Content-Type', 'application/x-www-form-urlencoded')
+            end)
+            local response = splash:http_get{
+                url = splash.args.url
+            }
+            return response.body
+        end
+        """
+
+    def parse_response(self, response):
+        # Handle the response from the server
+        # print("Response status:", response.status)
+        # print("Response body:", response.text)
+
+
+        self.log(f"Response status: {response.status}")
+        self.log(f"Response body: {response.text}")
+        self.log(f"Response Headers: {response.headers}")
+        
+        # Process the response as needed
+        if response.status == 200:
+            self.log("Export request successful.")
+        elif response.status == 202:
+            self.log("Export request accepted, processing will continue asynchronously.")
+        else:
+            self.log(f"Unexpected response status: {response.status}")
     #parsing level 1 categories
     # def parse(self, response):
 
@@ -211,8 +330,7 @@ class DataStoreSpider(scrapy.Spider):
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
         
-        print(response.url)
-        # print(response.body)
+        print(response.body)
         # api_url = "https://www.zara.com/ae/en/categories?"
         # # headers = {
         #     # "x-algolia-agent": "Algolia for vanilla JavaScript (lite) 3.27.0;instantsearch.js 2.10.3;JS Helper 2.26.0",
@@ -230,7 +348,8 @@ class DataStoreSpider(scrapy.Spider):
         #         }
         # url_with_params = api_url + "&".join([f"{key}={value}" for key, value in payload.items()])
         
-        # # category_title = response.meta.get('category_title')
+        # Articletitle = response.css("meta[itemprop = 'name']::text").get()
+        # print(Articletitle)
         # # category_image = response.meta.get("category_image")
         # # encoded_category_title = quote(category_title)
         # # params = payload["requests"][0]["params"]

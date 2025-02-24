@@ -8,10 +8,14 @@ import logging
 import hashlib
 class CustomImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
+        # numberofproductitemsperpage = len(item)
+        # print(f"The total number of product items per page are {numberofproductitemsperpage}")
+        # for index, image in  enumerate(item['image_urls']):
+        #     print(f"for the following {index} following is the image url: {image}")
         # print(item)
-        for image_url in item['image_urls']:
-
-            yield scrapy.Request(image_url )
+        # for index, image_url in enumerate(item['image_urls']):
+        #     print(f"for the above {index}, we have the following {image_url}")
+            yield scrapy.Request(item['image_urls'] )
         # meta={'category_title': item['CategoryTitle'], 'subcategoryTitle': item['subcategoryTitle'], 'productcolourID': item.get('ItemColour')}
     def process_item(self, item, spider):
         print(" I was here")
@@ -41,7 +45,7 @@ class CustomImagesPipeline(ImagesPipeline):
     
         image_name = os.path.basename(urlparse(request.url).path)
     # Construct the path using category, subcategory, and original filename
-        path = os.path.join('Dior',  image_name)
+        path = os.path.join(category, subcategory,   image_name)
         print(f"Saving to path: {path}")
         return path
         # filename = f"{category}_{subcategory}.jpg"

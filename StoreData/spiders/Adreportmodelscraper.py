@@ -58,10 +58,23 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "zara-store"
-    homeURL = "https://www.clickfunnels.com/"
+    name = "adreport-scraper"
+    homeURL = "https://www.zara.com/ae/en/"
     subcat_item = SubcategoryItem()
     product_api_url = "https://www.zara.com/ae/en/category"
+    start_urls = [
+        "https://www.momandpopwebstuff.com/"
+        # "https://thinkdifferentdesigns.com/",
+        # "https://mom-and-popmarketing.com/",
+        # "https://www.findmomandpop.com/",
+        # "https://www.designerrevival.com/",
+        # "http://www.maryarnoldtoys.com/",
+        # "https://www.tamaleboy.com/",
+        # "https://www.telleztamales.com/",
+        # "https://www.delicioustamales.com/",
+        # "https://www.thebrassowl.com/",
+
+    ]
     
     # custom_headers = {
     # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
@@ -162,10 +175,16 @@ class DataStoreSpider(scrapy.Spider):
             
     def start_requests(self):
         # Define a URL for an external IP address checker service
-        url = "https://www.clickfunnels.com/"
+        for url in self.start_urls:
+            yield scrapy.Request(
+                url=url,
+                callback=self.CustomRequest,
+                # cookies=self.new_cookies  # Include cookies if required
+            )
+        # url = 'https://health.usnews.com/doctors/dermatologists'
 
-        # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+        # # Make a request to the external service
+        # yield SplashRequest(url, self.CustomRequest, cookies=self.new_cookies)
     #parsing level 1 categories
     # def parse(self, response):
 
@@ -210,8 +229,18 @@ class DataStoreSpider(scrapy.Spider):
 
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
-        
-        print(response.url)
+        SiteDescription = response.css("meta[property='og:description']::attr(content)").get()
+        SiteTitle= response.css("title::text").get()
+        if SiteDescription:
+        # SiteTitle= response.css("meta[property='og:title']::attr(content)").get()
+            
+            
+            print(f"\nURL: {response.url}\nSite Title: {SiteTitle}\nSite Description: {SiteDescription}\n")
+        else:
+            SiteDescription = response.css("meta[name='description']::attr(content)").get()
+            print(f"\nURL: {response.url}\nSite Title: {SiteTitle}\nSite Description: {SiteDescription}\n")
+        # SiteTitle = response.css("meta::description").get()
+        # print(response.url)
         # print(response.body)
         # api_url = "https://www.zara.com/ae/en/categories?"
         # # headers = {

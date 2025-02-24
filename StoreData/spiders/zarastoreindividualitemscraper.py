@@ -58,8 +58,8 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "zara-store"
-    homeURL = "https://www.clickfunnels.com/"
+    name = "zara_store_individual_scraper"
+    homeURL = "https://www.zara.com/ae/en/"
     subcat_item = SubcategoryItem()
     product_api_url = "https://www.zara.com/ae/en/category"
     
@@ -73,7 +73,55 @@ class DataStoreSpider(scrapy.Spider):
     # 'Sec-Fetch-Site': 'cross-site',
     # ... any other headers you want to include ...
     # }
-
+    start_urls = ["https://www.zara.com/ae/en/oversize-twill-trench-coat-p01437305.html?v1=383069783",
+"https://www.zara.com/ae/en/structured-wool-cardigan-p02893361.html?v1=389488468",
+"https://www.zara.com/ae/en/basic-slim-fit-t-shirt-p05584360.html?v1=389573807",
+"https://www.zara.com/ae/en/basic-jogger-trousers-p00761332.html?v1=407839230",
+# "https://www.zara.com/ae/en/basic-jogger-trousers-p06543219.html",
+"https://www.zara.com/ae/en/basic-jogger-trousers-p00761332.html?v1=386685343",
+"https://www.zara.com/ae/en/basic-slim-fit-t-shirt-p05584360.html?v1=389573807",
+"https://www.zara.com/ae/en/basic-slim-fit-t-shirt-p05584360.html?v1=389573807",
+"https://www.zara.com/ae/en/basic-hoodie-p00761330.html?v1=407839228",
+"https://www.zara.com/ae/en/sweatshirt-with-printed-slogan-p06224369.html?v1=388537345",
+"https://www.zara.com/ae/en/relaxed-fit-cargo-trousers-p06786301.html?v1=403895021",
+"https://www.zara.com/ae/en/cargo-denim-trousers-with-pockets-p05575304.html?v1=382674703",
+"https://www.zara.com/ae/en/denim-jacket-with-pockets-p04365408.html?v1=396965327",
+"https://www.zara.com/ae/en/quilted-bomber-jacket-p03046520.html?v1=389561756",
+"https://www.zara.com/ae/en/slim-fit-jeans-p03991340.html?v1=388283436",
+"https://www.zara.com/ae/en/skinny-fit-chino-trousers-p06786405.html?v1=375204098",
+"https://www.zara.com/ae/en/baggy-fit-jeans-p08062380.html?v1=415981675",
+"https://www.zara.com/ae/en/textured-cotton-sweater-p04696310.html?v1=403268597",
+"https://www.zara.com/ae/en/textured-training-t-shirt-p04387312.html?v1=413846328",
+"https://www.zara.com/ae/en/2-in-1-training-shorts-p01943320.html?v1=364562843",
+"https://www.zara.com/ae/en/basic-training-t-shirt-p04387401.html?v1=380981871",
+"https://www.zara.com/ae/en/basic-textured-sweater-p03332320.html?v1=388987366",
+"https://www.zara.com/ae/en/basic-textured-sweater-p03332320.html?v1=388987366",
+"https://www.zara.com/ae/en/basic-textured-sweater-p03332320.html?v1=388987366",
+"https://www.zara.com/ae/en/wool-twill-suit-trousers-p06775206.html?v1=404062145",
+"https://www.zara.com/ae/en/oversize-fit-jacket-p02668360.html?v1=413808966",
+"https://www.zara.com/ae/en/colour-block-technical-jacket-p03918418.html?v1=397808549",
+"https://www.zara.com/ae/en/tie-dye-print-sweatshirt-p04393417.html?v1=417501985",
+"https://www.zara.com/ae/en/faded-cargo-bermuda-shorts-p05862429.html?v1=371007225",
+"https://www.zara.com/ae/en/cargo-parachute-trousers-p06786303.html?v1=392930424",
+"https://www.zara.com/ae/en/textured-sweater-p05755358.html?v1=386723588",
+"https://www.zara.com/ae/en/contrast-twill-trousers-p04042028.html?v1=412097878",
+"https://www.zara.com/ae/en/textured-chino-bermuda-shorts-p08727425.html?v1=380982279",
+"https://www.zara.com/ae/en/baggy-fit-bermuda-jorts-p05575498.html?v1=388190707",
+"https://www.zara.com/ae/en/100-linen-bermuda-shorts-p09621003.html?v1=364113492",
+"https://www.zara.com/ae/en/cotton---linen-shirt-p01063402.html?v1=364086315",
+"https://www.zara.com/ae/en/textured-weave-knit-shirt-p09598319.html?v1=366155562",
+"https://www.zara.com/ae/en/oversized-denim-shirt-with-pockets-p03991301.html?v1=364092475",
+"https://www.zara.com/ae/en/western-denim-shirt-p01063308.html?v1=373211505",
+"https://www.zara.com/ae/en/textured-shirt-p05569812.html?v1=370069147",
+"https://www.zara.com/ae/en/compression-training-t-shirt-p01943303.html?v1=387272143",
+"https://www.zara.com/ae/en/hooded-down-jacket-p04695314.html?v1=435659250",
+"https://www.zara.com/ae/en/running-training-shorts-p01943302.html?v1=372742458",
+"https://www.zara.com/ae/en/mesh-textured-shorts-p06096310.html?v1=386924324",
+"https://www.zara.com/ae/en/mesh-textured-shorts-p06096300.html?v1=364107406",
+"https://www.zara.com/ae/en/skinny-fit-chino-trousers-p06786405.html?v1=375204098",
+"https://www.zara.com/ae/en/slim-fit-jeans-p05585320.html?v1=416700747",
+"https://www.zara.com/ae/en/polo-sweatshirt-p01501504.html?v1=405849910",
+"https://www.zara.com/ae/en/cropped-polo-sweatshirt-p00761307.html?v1=391007376"]
     custom_cookies = {
         '__Secure-1PAPISID': '6wl3847Xx2qcWqlY/AsU77BmANv5IW123L',
         '__Secure-3PSID': 'g.a000iQjrgnUeyyQzOhvVffwQwSUJ_9seUWKidq00jq3KvLaMvMAFV7Vidr5w_6Nwu7_KM66w_wACgYKAXkSAQASFQHGX2MiN1UHzdWd0zfAioR-zTotVxoVAUF8yKpSwri6zp2HXm8zJ9Op8oMw0076',
@@ -93,32 +141,26 @@ class DataStoreSpider(scrapy.Spider):
         # 'bm_sv': '74BCAEBA6F7F769BFFECEE40EE04897E~YAAQZR0gF5AcbgKPAQAAAu2QGBfGq5x0IDBARj3ltiK6qCBVDTJT7x8AeZ43hx7nmAO9JE90SK3wkeNlel6FTv0FdR0p0kkkzT/Tp97NFc7fk+wyPT/IcHGRtT9UTRnWdVPntwOThtxjg7Uw43S6W5jX759gPn5IgYwJZQkMPE69GRrRJ3ie1B94upEzfVX9PfER75zKXkQPJxXnUZacKehm6eLy2FAPC4iGVabykwmsGP/QSF202k3yzJHhFAU=~1'
     }
     new_cookies = {
-        'usn_visitor_id': '3d9b1702a4f601008b21bb66f50000003a280000',
-        'OTGPPConsent': 'DBABLA~BVQqAAAACgA.QA',
-        '_sharedid': 'f6c14874-c276-4fef-99e2-3dbdba4dbcd2',
-        '_sharedid_cst': 'zix7LPQsHA%3D%3D',
-        'usn_bot': 'ab986e8474d899cfd17743c422756311',
-        'usn_session_id': '26752857852529728',
-        'cogv': 'health',
-        '_abck': '7FF34998C91CFE851B25E01E0C0CD333~-1~YAAQXZ42F7n23OCRAQAAP0fhDQypy2Il/R5Haq9RLLYjVoYLxJE3WB8ZhdP3LwPTBwAfAm740MZ2IN/stirb8J/BdIwS0NKD3aCIoZ9RUb2ht62r6TzWRshtXN4rgGH1wpVavyfC1gk4JH/9mYV9NkIBee/pOlPzSKmws3KUZeNE9II5GdwbMnWU5osoB8L8BgzCbdO41v5vkI3h82soJ24X1ZjQiP3//OKibrXXCvtoiAapWTEdLYXM7dTp3huwuwhL2JTHhtOTDMzNtSB1YmQQww4AYCWLdKOdZxhL+EJVA2jlsYKfcSWMAY4+bmqE8ZX/i50Vd3VuVi6rSAz31SrKopQkF+hVRQMrtxdmsfSNATUgJxk/mQnnunoUp4FblaLM4+K4Mr+0FA==~-1~-1~-1',
-        'bm_mi': 'DDAE42EC37C8BE5F4114ACA15F0CF9B3~YAAQXZ42F3Av3eCRAQAAmlXnDRn86j58Lva7CYW4XfSORE1+1QWW1sI7kvGj0Qy5gOpVVzAiGq+zoP1xr9pW1Tlg7OcFWgwscEnZPEg1ribiSNZ8ux5zW7Yn0tCaQQ3UVWId2aVN0Syvcfpa6n5rynPPlDi4aS7XLsmqqKZ2xkAVwAKQ1ND6u9xLrnt23pd2sEljpYs0oa6PFqnYeaJujWMm7KhK/tUpW4t4qzZ+SL1F8JwestNB9SM+baCuCu1nbO9BPg1d2jsMxQozF2u+7uCYqJHRQF8WW93QOn0DpUn6EmptbMDFh60/LOwVpFHqzJiLZImBXow9EKo0AsY83EFM4JTs7mrLE9JY9aY=~1',
-        'ak_bmsc': 'C049DDA613B0054695F78D1BA8167EF9~000000000000000000000000000000~YAAQU542F70iKe2RAQAA5lQPDhn077H6HhdKKix+pxM39UG3edEjIK4hEuOheDJInwtDWt7IXv9ui7O9FepFE2ATJF0cbuTBD6brO7kVrUvJnKv67BH/O8U4X4hJ0La9odxmkNLz42UozYxUMJV8e6XQ+90/oY7/iR0fo02aeQ6vnKeKSgZCE2CwT8xoiMbNYw0UwPm6StEUI+RqgNUQeB/TM+g+AWGBpRfOVFqcWwcBh6edrIW/ReBHishPxak3v+02QSPNQU40vy0i/IM5Rqpmdz/tMsEhXzvNe4HgODD2xxDClGIrGovldF9FB/VU31NrVm8popsylkOzToQYn4ImTrd3OKlQaa3J1CQSu/C/oB1EXXdjaADPjWRsx4IbmAmakKwaEtO0WuAG/plVCoEINUiz0H6REOxqlnZj5kpAVl1h2pV5IOISvoN5Lk4bcIBJhMgPHglce3Ialr+1X+s=',
-        'SEARCH_SAMESITE':	'CgQIg5wB',	
-'SID' :	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1em3xxCqEEaxvLQpewLxJ6gACgYKAQYSARESFQHGX2MiyT-I6-dRxvzblYMOwq1svBoVAUF8yKrXLOSHuCGAZHhMWUtItz2I0076',	
-'SIDCC' :	'AKEyXzWFB86TX0Bg8vXSCu_4oPJ7w_I-HvvPMDHE1pbkZF8L9HjEJWedhqJ6QnKrfl3HM_uGeP8'	,
-'SMSV' :	'ADHTe-C37StV7-3QVx78wI_E30I6f9hdkchN47J9MEPwWFMblFwSjRB4SlLOdjtvToH1QZTgAmmUzo4EP0S-CX97Y0ZsPF0XfmQWX7p9pcAqHKAC1rArY0k',	
-'SSID' :	'AOcj_ApoeZxsc5A4O',			
-'__Secure-1PAPISID':	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',	
-'__Secure-1PSID':	'g.a000ngjnEnVvMP59S0ctW6TuPAqqK_Bex_BfEqR7MTZULYalqNj1g9q32OlQrRgAofcNxSF1-gACgYKAcMSARESFQHGX2Mikf2MI2EbmA5DjwHrNLk2XBoVAUF8yKq97MjjFlHLTcRVDp2ZvHJX0076',	
-'__Secure-1PSIDCC' :	'AKEyXzXVefKJPPeGGFiOqTDTqQacB-c6vK8YTkEm9VNPNPYIluXTcBVc8HbcSpqVVTA70akGvQ',
-'__Secure-1PSIDTS' :	'sidts-CjEBQlrA-LapsRT0_1uDfTWmcqwB5p8iXrvypXvHSxH4dqcDcydbZxm6T4E0s4dFwd30EAA',		
-'__Secure-3PAPISID' :	'IejbwTEOdRkZt1hW/ASqtlUDidIGO56Tck',
-'usn_bot':	'c8379024141b5d6c256145540813d116',
-'usn_bot':	'e0c911a05f9945af45cae7211bdeb439',		
-'usn_bot' :	'ab986e8474d899cfd17743c422756311',	
-'usn_session_id': 	'26752857852529728'	,
-'usn_visitor_id' :	'3d9b1702a4f601008b21bb66f50000003a280000',		
-'utag_main	v_id':'01914afb08f200028d2',
+        "rid": "1b551eb7-472f-4bc0-8e33-4b8ee0201702",
+    "optimizelyEndUserId": "oeu1718121224659r0.6818106508794575",
+    "UAITXID": "65509b2f523e6ed59eeb0c2eb89361636ec9c9abf377f0d8b863deb2f786209d",
+    "ITXDEVICEID": "bef8f8873c286ad312bb19ae5377cfd1",
+    "bm_lso": "E6EFFCE4280915837DB7FFBF7E1AD2DC3F20CB53408071481D2A0994A19D56A5~YAAQhSg0Fyq6tN+UAQAAHYL/+QJ2jsQ1WvRIcx2bkQedFg6bveEytFHwuuAuq96zq8h8OHcoLskzxfNgNERfYUpx2L+qZ27Um0N8s9oWvKV8dN0i7VkYO7uubqj6UTqyAfAjCof2wm4FARyueJrgxhNJYlYsSzjE+ivz+axsNfUw+LMWLPqilxhLI/bONYwYA3BUz5iWhwbIUoT+fL4+8gvP+qxA0MPRyDdZy8wDp4jktC3eHktXd9PArgrLJCdpSX1TfpjBPhkeePIlYdgUdAJEjauW85+I2XzWoWQpDMzNQpj4k+xnUhdhGe7PjMJV7gp/4Eo817MSEPsTzOrWiOmGkXqpO2r5rw6tQYEH0j6W03R0Fcst3+EdEuCEX1dWd8S+LJ7IrFn3VVHStfKEJ8blrsAY+oIWzMdOjCPMWrHqlly98f8sfkVRUk67LlTOdTzG27NFGUqjfDWgmQ==^1739361060448",
+    "foreignRegionConfirmed": "ae",
+    "optimizelySession": "0",
+    "ITXSESSIONID": "d31a2cdff4711677a4affed3104a9c61",
+    "_itxo11y_ses.01fa": "*",
+    "cart-was-updated-in-standard": "true",
+    "IDROSTA": "5ea3cf939604:1c2e1c796a775429819b833bb",
+    "bm_ss": "ab8e18ef4e",
+    "826b75e46a856af63aa6a715b40616e7": "08e3a1a9f26f48aa1a58a30a3223bf57",
+    "_abck": "E37FB0D80B6F2B5BEC61B32B80EEEDC2~0~YAAQZR0gF32P8SCVAQAAfDCwIw2bHa9Gwlq/OXHQA1jlFs6h+jNCu/eu1AZRDNiVxweGWv4MKKzCJIsqY7CZBQBHGPaf2aRi8Ci4g0d6c/btEjzZbLCv6/oWQdxTFWqF4kPGEyKN6z1BIjFaE24hKhthZfIXGUyh5eZeYnbTDb+IaYhbbNUeoHoLdf+5k08wccmB/UBz0LoyBzuXVZIuJGWyjps3YZ9RXffCI0HW3mfL0NCuPBgDXK9zLquwiIO/CnFqBeGy7Ds51ahEDhvXURJBSQka65OAAb8SNjLzDtL3KIWbdb/gXB4WuqpSSa51SRsadWtu+uvSIeROkfxqX2UfnHPDwiJgqYro2MF0szUW3ARsLxHEl50CWctO/qBnywhM8nqPpIdPKnc9tKQylSOL6XZd7qszhLm+73OJJXlbl0S9f/J3Rid8rVWr~-1~-1~1740064101",
+    "bm_mi": "F893E0CC7A1CBEEFED4B7F0E3BF8BE6D~YAAQP9s4fWisSyGVAQAAIyazIxrk6VJ4xMErwcKubWOS7IYdRNG/imcUh9IgsvsFLuHJ8sOwvhMq1fYBJKHG2WW1rXxyOBVEfpUvRBN7Jcd3opNCZ4pBgJNs2FF6Ei7RGTzVHLvVDCAqK/ZIIHV/LVetkNpKX0uGuPJtVTPtzvkUwd6kJamXQ1Cpe/ixYEaqr/36bv9DK8PX7dJ8aZlFLZYQNL/KuDZgig6a63LcTKgQzeYX3Q7HqZJ8llFaz/B70oeZmlD3R/4a+Jb2OaLXsUrFt6ZqBZx21mQQV3rNj6bFZUQYcsIMgim2Ed8aMjTVjoUz/GrPI1XnTR3EmATL9bua8mpaoUVRb1MyrUDdzqGhWOaZn3Jn5OSHx8Vends=~1",
+    "bm_sv": "7EF2E17F8C2C069CAF35C1AD7CADF3D4~YAAQP9s4fUStSyGVAQAAciyzIxrwsPG603xuHt7cbiMVZnijqLjTP8X08Jxd2bhch+nUbkloDEf/eHdMBMX7UdkNuZLKQ3s7VcYTpmWNZIKmEdmdvUysiUmHQ+pZKXHCgGNxZzPNFc9cIng+XR8bmDhbjVOZPV7Dwri0A44T1izuEQIZkMZFR6IIrAJ/gsHBXq9Z5ZPM7jSIhAdQPXbx1UGkSj02IkfYGcBXW2SmezeQ+eybKL0Z3PNGiJTJui0=~1",
+    "OptanonAlertBoxClosed": "2025-02-20T14:13:52.857Z",
+    "OptanonConsent": "isGpcEnabled=0&datestamp=Thu+Feb+20+2025+19%3A13%3A53+GMT%2B0500+(Pakistan+Standard+Time)&version=202501.2.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=d71e6348-f8a4-4b82-9957-47e32a345b0f&interactionCount=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&geolocation=PK%3BPB&AwaitingReconsent=false&isAnonUser=1",
+    "TS0122c9b6": "01d57b118c0a4fa8d01f7bec504c3e134504b0fb746a6f2a1a580069cb863c0f63bc92a2ba585a5c41d4ad64aec34f9a00ecf649d6",
+    "_itxo11y_id.01fa": "34318b0e-f452-4cfb-994e-ad1569ee2555.1718121146.29.1740060835.1739449538.b996e1f4-0a37-4afc-ac85-9f6df665d25d.01837f36-5201-489f-928e-52fa2efed413.91eaccf4-b1a7-403d-bb77-0ea709063c7b.1740060500938.59"
     }
     # custom_cookies={
                     # 'ITXSESSIONID': '71fee5cda8aa57ee7427246d4bed66e1',
@@ -162,10 +204,11 @@ class DataStoreSpider(scrapy.Spider):
             
     def start_requests(self):
         # Define a URL for an external IP address checker service
-        url = "https://www.clickfunnels.com/"
-
+        
+        
+        for url in self.start_urls:
         # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+            yield SplashRequest(url, self.CustomRequest, cookies=self.new_cookies)
     #parsing level 1 categories
     # def parse(self, response):
 
@@ -210,8 +253,19 @@ class DataStoreSpider(scrapy.Spider):
 
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
+        print(response.body)
+        # ProductDescription = response.css("meta[property='og:description']::attr(content)").get()
+        # print(ProductDescription)
+        # print(f"The response URL is {response.url}")
         
-        print(response.url)
+        # with open("response_output.txt", "w", encoding="utf-8") as file:
+        #     file.write(response.text)
+            # json_response = json.loads(response.text)
+            # file.write(json.dumps(json_response, indent=4, ensure_ascii=False))
+        # processed_seo_keywords = set()
+        # product_groups = json_response.get('productGroups', [])
+        # for group in product_groups:
+        # print(response.url)
         # print(response.body)
         # api_url = "https://www.zara.com/ae/en/categories?"
         # # headers = {
@@ -251,7 +305,7 @@ class DataStoreSpider(scrapy.Spider):
         # )
     # parsing the level2 categories
     def parse_api_response(self, response):
-        print(f"The response url is {response.url}")
+        
         # print(response.body)
         # headers = {
         #     "x-algolia-agent": "Algolia for vanilla JavaScript (lite) 3.27.0;instantsearch.js 2.10.3;JS Helper 2.26.0",

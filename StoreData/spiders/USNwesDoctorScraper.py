@@ -58,10 +58,10 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "zara-store"
-    homeURL = "https://www.clickfunnels.com/"
+    name = "health_news_sraper"
+    homeURL = "https://health.usnews.com/"
     subcat_item = SubcategoryItem()
-    product_api_url = "https://www.zara.com/ae/en/category"
+    # product_api_url = "https://www.zara.com/ae/en/category"
     
     # custom_headers = {
     # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
@@ -162,10 +162,10 @@ class DataStoreSpider(scrapy.Spider):
             
     def start_requests(self):
         # Define a URL for an external IP address checker service
-        url = "https://www.clickfunnels.com/"
+        url = 'https://health.usnews.com/doctors'
 
         # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+        # yield SplashRequest(url, self.CustomRequest, cookies=self.new_cookies)
     #parsing level 1 categories
     # def parse(self, response):
 
@@ -211,7 +211,20 @@ class DataStoreSpider(scrapy.Spider):
         #  creating and sending request to individual categories          
     def CustomRequest(self, response):
         
-        print(response.url)
+        # print(response.url)
+        common_specialties_main_div = "ul[data-test-id='CommonSpecialties'] > li"
+        for li in response.css(common_specialties_main_div):
+            Specialty_name = li.css("a::text").get()
+            Partial_specialty_URL = li.css("a::attr(href)").get()
+            specialty = Partial_specialty_URL.split('/')[-1]
+            Full_specialty_URL = f"{self.homeURL}{Partial_specialty_URL}"
+            yield SplashRequest(Full_specialty_URL, self.parse_api_response, cookies=self.new_cookies, meta={
+                                            'specialtyname': Specialty_name,
+                                            'specialtyidentifier': specialty,
+                                            # "subcategoryname": temporarycollection,
+                                            # # 'params': params,
+                                            # "categoryID": redirectcategoryID
+                                        }         )
         # print(response.body)
         # api_url = "https://www.zara.com/ae/en/categories?"
         # # headers = {
@@ -251,196 +264,96 @@ class DataStoreSpider(scrapy.Spider):
         # )
     # parsing the level2 categories
     def parse_api_response(self, response):
-        print(f"The response url is {response.url}")
-        # print(response.body)
-        # headers = {
-        #     "x-algolia-agent": "Algolia for vanilla JavaScript (lite) 3.27.0;instantsearch.js 2.10.3;JS Helper 2.26.0",
-        #     "x-algolia-application-id": "1D2IEWLQAD",
-        #     "x-algolia-api-key": "87ca3b6b2ce56f0bb76fc194a8d170e2",
-        #     "Content-Type": "application/json",  # Specify content type as JSON
-        # }
-        
-        json_response = json.loads(response.text)
-        # print(json_response)
-        # category_title = response.meta.get('category_title')
-        # category_image = response.meta.get("category_image")
-        # params = response.meta.get('params')
-        # new_url ="https://danube.sa/en/departments/meat-poultry-seafood"
-        # with open("abc.json", 'a') as file:
-        #     json.dump(json_response, file, indent=4)   
-        # # getting the subcategories response
-        # found_keys = []
-        for result in json_response.get('categories', []):
-            # print(f"The following result should be{result}")
-        #     #list to store all level 2 categories in 1 level 1 category
-            # https://www.zara.com/ww/en/satin-shirt-p02248802.html?v1=355842665&v2=2352904&ajax=true
-            CategoryID = result.get('id')
-            categoryName = result.get('name')
-            
-            
-            # https://www.zara.com/ww/en/categories?categoryId=2352684&categorySeoId=1055&ajax=true
-            if categoryName != "KIDS" and categoryName != "BEAUTY":
-                print(f"{categoryName} : {CategoryID}")
-                for facet in result.get('subcategories', [{}]):
-                    # for collection in facet.get('', [{}]):
-                    collectionID =facet.get('id')
-                    temporarycollection = facet.get('name')
-                    # actualcollection = re.sub(r'\s+', '', temporarycollection)
-                    # print(temporarycollection)
-                    possibelsubcats= ['BLAZERS', 'DRESSES' 'TOPS | BODYSUITS', 'T-SHIRTS', 'SHIRTS', 'WAISTCOATS', 'SKIRTS', 'SHORTS | SKORTS', 'TROUSERS', 'JEANS', 'CARDIGANS | SWEATERS', 'JACKETS | TRENCH COATS', 'SWEATSHIRTS | JOGGERS', 'HOODIES | SWEATSHIRTS', 'SUITS', 'SWEATERS | CARDIGANS', 'TRACKSUITS', 'OVERSHIRTS', 'BLAZERS', 'POLO SHIRTS', 'SHORTS'  ]
-                    # 
-                    if(temporarycollection in possibelsubcats):
-                    #     print("I am here")
-                        for subcategory in facet.get('subcategories', [{}]):
-                            # print(subcategory)
-                            if(temporarycollection == "TOPS | BODYSUITS"):
-                                temporarycollection = "TOPS AND BODYSUITS"
-                            elif(temporarycollection == "SHORTS | SKORTS"):
-                                temporarycollection = "SHORTS AND SKORTS"
-                            elif(temporarycollection == "CARDIGANS | SWEATERS"):
-                                temporarycollection = "CARDIGANS AND SWEATERS"
-                            elif(temporarycollection == "JACKETS | TRENCH COATS"):
-                                temporarycollection = "JACKETS AND TRENCH COATS"
-                            elif(temporarycollection == "SWEATSHIRTS | JOGGERS"):
-                                temporarycollection = "SWEATSHIRTS AND JOGGERS"
-                            elif(temporarycollection == "HOODIES | SWEATSHIRTS"):
-                                temporarycollection = "HOODIES AND SWEATSHIRTS"
-                            elif(temporarycollection == "SWEATERS | CARDIGANS"):
-                                temporarycollection = "SWEATERS AND CARDIGANS"    
-                            else:    
-                                temporarysubcategory = subcategory.get('name')
-                                print(f"the subcategories are{temporarycollection}")
-                                redirectcategoryID = subcategory.get('id')
-                                # print(redirectcategoryID)
-                                seocategoryID = subcategory.get('seo', {}).get('seoCategoryId')
-
-
-                        
-
-                        
-                        # # seocategoryID = facet.get('seo', {}).get('seoCategoryId')
-                                print(f"{temporarycollection} : {redirectcategoryID}, {seocategoryID}")
-                                if redirectcategoryID and seocategoryID:
-                                    productURL = f"{self.product_api_url}/{redirectcategoryID}/products?ajax=true"
-                                    
-                                    print(f"The product url is {productURL}")
-                                    yield Request(
-                                        url=productURL,
-                                        method='GET',
-                                        # body=json.dumps(payload),
-                                        callback=self.SubcategoryURLParse,
-                                        meta={
-                                            'categoryName': categoryName,
-                                            "subcategoryname": temporarycollection,
-                                            # 'params': params,
-                                            "categoryID": redirectcategoryID
-                                        }         
-                                    )
-                # print(f"subcategoryName + {actualsubcategoryName}" )
-                # print(f"redirectcategoryid + {redirectcategoryID}" )
-                # print(facet)
-            # 
-        #         if facet in ["price", "taxons_en.lvl0", "taxons_en.lvl1", "taxons_en.lvl2"]:
-        #             facet_data = result['facets'][facet]
-                    
-        #             target_key = None
-        #             if isinstance(facet_data, dict):
-        #                 for key, value in facet_data.items():
-        #                     if category_title in key:
-        #                         # if  in taxons.get:
-        #                         parts = key.split(f" > {category_title} >" )
-        #                         if len(parts) >= 2:
-        #                             target_key = parts[-1]
-        #                             found_keys.append(target_key)
-        # print(f"{category_title} and found keys {found_keys}")                          
-        # # # Your logic here...
-        # counter = 0
-        # if found_keys:
-        #     #if there are subcategories the send go in to the custom categories
-        #     for key in found_keys:
-
-        #         if(key == " Milk \\ Milk Alternatives"):
-        #             yield  scrapy.Request(
-        #             new_url,
-                    
-        #             self.customSubCategoriesRequest,
-        #             meta={
-        #                 "category_title": category_title,
-        #                 "sub_category": "Milk \\ Milk Alternatives",
-        #                 'category_image': category_image
-        #             })   
-        #         else:
-        #             yield  scrapy.Request(
-        #             new_url,
-                    
-        #             self.customSubCategoriesRequest,
-        #             meta={
-        #                 "category_title": category_title,
-        #                 "sub_category": key,
-        #                 'category_image': category_image
-        #             }
-        #         ) 
-               
-        #         #sending request to level 2 categories
-                  
-        # else:
-        #     print("no keys found")
-            #  
-
-    #this method send a request to each level2 category to send to get the total pages
-    def SubcategoryURLParse(self,response):
         # print(f"The response url is {response.url}")
-        category_title = response.meta.get('categoryName')
-        sub_category_title = response.meta.get('subcategoryname')
-        categoryId = response.meta.get('categoryID')
-        json_response = json.loads(response.text)
-        processed_seo_keywords = set()
-        product_groups = json_response.get('productGroups', [])
-        for group in product_groups:
-            elements = group.get('elements', [])
-            for element in elements:
-                commercial_components = element.get('commercialComponents', [])
-                for component in commercial_components:
-                    # marketingmetainfo = component.get('marketingMetaInfo',{})
-                    # if not isinstance(marketingmetainfo, list):
-                        # marketingmetainfo = [marketingmetainfo] 
-                    # for marketmeta in marketingmetainfo:
-                        # mappinginfo = marketmeta.get('mappingInfo', [])
-                        # for mapping in mappinginfo:
-                            # regions = mapping.get("regions", [])
-                            # for region in regions:
-                                # area_link = region.get('areaLink', {})
-                                # mainlink = area_link.get('url')
-                                # endpoint = area_link.get('queryParams')
-                                # print(mainlink)
-                                # print(endpoint)
+        specialtyname = response.meta.get('specialtyname')
+        specialtyidentifier = response.meta.get('specialtyidentifier')
+        body_str = response.body.decode('utf-8')
+        script_pattern = r'<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>'
+        matches = re.findall(script_pattern, body_str, re.DOTALL)
+        
+        if matches:
+            for match in matches:
+                json_content = match.strip()  # Extract and clean the content inside the script tag
+                # print(json_content)  # Print or process the JSON content
+                json_data = json.loads(json_content)
+                # print(json_data)
+                # for data in json_data:
+                #     print(data)
+                if isinstance(json_data, dict) and json_data:
+                    DoctorType = json_data.get("@type")
+                    if DoctorType == "Physician":
+                        # print(json_data)
+                        DoctorName = json_data.get("name")
+                        DoctorDescription = json_data.get("description")
+                        DoctorDescription = json_data.get("description")
+                        DoctorIndividualURl = json_data.get("url")
+                        yield SplashRequest(DoctorIndividualURl, self.SubcategoryURLParse, cookies=self.new_cookies, meta={
+                                            'specialtyname': specialtyname,
+                                            'specialtyidentifier': specialtyidentifier,
+                                            'doctorname' : DoctorName,
+                                            'doctordescription' : DoctorDescription
+                                            # "subcategoryname": temporarycollection,
+                                            # # 'params': params,
+                                            # "categoryID": redirectcategoryID
+                                        }         )
 
-                    # print(component)
-                    seo = component.get('seo', {})
-                    ProductSEOkeyword = seo.get('keyword')
-                    SEOProductID = seo.get('seoProductId')
-                    DiscerningProductID = seo.get('discernProductId')
-                    # print(f"{ProductSEOkeyword} : SEOID = {SEOProductID} , Discerning ID {DiscerningProductID}")
-                    if ProductSEOkeyword not in processed_seo_keywords:
-                        # print("no processed keywords")
-                        processed_seo_keywords.add(ProductSEOkeyword)
-                        individualItemRequest = F"{self.homeURL}{ProductSEOkeyword}-p{SEOProductID}.html?v1={DiscerningProductID}&v2={categoryId}&ajax=true"
-                        # print(individualItemRequest)
-                    #    https://www.zara.com/ww/en/textured-round-neck-blazer-p02254187.html?v1=367663930&v2=2352684&ajax=true
+    def SubcategoryURLParse(self,response):
+        print(f"The response url is {response.url}")
+        specialtyname = response.meta.get('specialtyname')
+        specialtyidentifier = response.meta.get('specialtyidentifier')
+        InsurancePlanDivider = response.css("div > p.Paragraph-sc-1iyax29-0.fynXQ")
+        # for divider in InsurancePlanDivider
+        # category_title = response.meta.get('categoryName')
+        # sub_category_title = response.meta.get('subcategoryname')
+        # categoryId = response.meta.get('categoryID')
+        # json_response = json.loads(response.text)
+        # processed_seo_keywords = set()
+        # product_groups = json_response.get('productGroups', [])
+        # for group in product_groups:
+        #     elements = group.get('elements', [])
+        #     for element in elements:
+        #         commercial_components = element.get('commercialComponents', [])
+        #         for component in commercial_components:
+        #             # marketingmetainfo = component.get('marketingMetaInfo',{})
+        #             # if not isinstance(marketingmetainfo, list):
+        #                 # marketingmetainfo = [marketingmetainfo] 
+        #             # for marketmeta in marketingmetainfo:
+        #                 # mappinginfo = marketmeta.get('mappingInfo', [])
+        #                 # for mapping in mappinginfo:
+        #                     # regions = mapping.get("regions", [])
+        #                     # for region in regions:
+        #                         # area_link = region.get('areaLink', {})
+        #                         # mainlink = area_link.get('url')
+        #                         # endpoint = area_link.get('queryParams')
+        #                         # print(mainlink)
+        #                         # print(endpoint)
 
-                    #     # productURL = f"{self.product_api_url}/{redirectcategoryID}/products?ajax=true"
-                        yield Request(
-                            url=individualItemRequest,
-                            method='GET',
-                            # body=json.dumps(payload),
-                            callback=self.custom_Request_level_3,
-                            meta={
-                                'categoryName': category_title,
-                                "subcategoryname": sub_category_title,
-                            # 'params': params,
-                                # "categoryID": redirectcategoryID
-                            }         
-                        )
+        #             # print(component)
+        #             seo = component.get('seo', {})
+        #             ProductSEOkeyword = seo.get('keyword')
+        #             SEOProductID = seo.get('seoProductId')
+        #             DiscerningProductID = seo.get('discernProductId')
+        #             # print(f"{ProductSEOkeyword} : SEOID = {SEOProductID} , Discerning ID {DiscerningProductID}")
+        #             if ProductSEOkeyword not in processed_seo_keywords:
+        #                 # print("no processed keywords")
+        #                 processed_seo_keywords.add(ProductSEOkeyword)
+        #                 individualItemRequest = F"{self.homeURL}{ProductSEOkeyword}-p{SEOProductID}.html?v1={DiscerningProductID}&v2={categoryId}&ajax=true"
+        #                 # print(individualItemRequest)
+        #             #    https://www.zara.com/ww/en/textured-round-neck-blazer-p02254187.html?v1=367663930&v2=2352684&ajax=true
+
+        #             #     # productURL = f"{self.product_api_url}/{redirectcategoryID}/products?ajax=true"
+        #                 yield Request(
+        #                     url=individualItemRequest,
+        #                     method='GET',
+        #                     # body=json.dumps(payload),
+        #                     callback=self.custom_Request_level_3,
+        #                     meta={
+        #                         'categoryName': category_title,
+        #                         "subcategoryname": sub_category_title,
+        #                     # 'params': params,
+        #                         # "categoryID": redirectcategoryID
+        #                     }         
+        #                 )
         
 
     def extract_json_from_response(self, response_text):

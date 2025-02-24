@@ -166,6 +166,7 @@ DOWNLOADER_MIDDLEWARES = {
    'scrapy_splash.SplashMiddleware': 725,
    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
    'StoreData.middlewares.Retry429Middleware': 543,
+   'scrapy.downloadermiddlerwares.offsite.OffsiteMiddleware': None,
    # 'StoreData.ProxyRotationMiddleware.ProxyRotationMiddleware': 100,
    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
    # StoreData\ProxyRotationMiddleware.py
@@ -221,7 +222,7 @@ EXTENSIONS = {
 #HTTPCACHE_DIR = "httpcache"
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
-DOWNLOAD_DELAY = 4
+DOWNLOAD_DELAY = 1
 # DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'

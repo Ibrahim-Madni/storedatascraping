@@ -6,6 +6,12 @@ from scrapy.crawler import CrawlerProcess
 from scrapy_splash import SplashRequest 
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.pipelines.images import ImagesPipeline
+from scrapegraphai.graphs import SmartScraperGraph
+from scrapegraphai.utils import prettify_exec_info
+import asyncio
+from requests.exceptions import RequestException, HTTPError, ConnectionError, Timeout
+import logging
+import requests
 from urllib.parse import unquote, urljoin, quote
 from scrapy import Request
 # from StoreData.settings import INSTANCE_1_SETTINGS, INSTANCE_2_SETTINGS
@@ -58,11 +64,26 @@ class ProductItem(scrapy.Item):
     Size20 = scrapy.Field()
 
 class DataStoreSpider(scrapy.Spider):
-    name = "zara-store"
-    homeURL = "https://www.clickfunnels.com/"
+    name = "health-news"
+    base_url = "https://health.usnews.com"
     subcat_item = SubcategoryItem()
-    product_api_url = "https://www.zara.com/ae/en/category"
+    # product_api_url = "https://www.zara.com/ae/en/category"
     
+    graph_config = {
+   "llm": {
+      "model": "ollama/llama3",
+      "temperature": 1,
+      "format": "json",  # Ollama needs the format to be specified explicitly
+      "model_tokens": 29000, #  depending on the model set context length
+       "base_url": "http://localhost:11434",  # set ollama URL of the local host (YOU CAN CHANGE IT, if you have a different endpoint
+      
+   },
+   "embeddings": {
+      "model": "ollama/nomic-embed-text",
+      "temperature": 0,
+      "base_url": "http://localhost:11434",  # set ollama URL
+   }
+}
     # custom_headers = {
     # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
     # 'Sec-Ch-Ua': '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
@@ -162,13 +183,14 @@ class DataStoreSpider(scrapy.Spider):
             
     def start_requests(self):
         # Define a URL for an external IP address checker service
-        url = "https://www.clickfunnels.com/"
+        url = 'https://health.usnews.com/doctors'
 
         # Make a request to the external service
-        yield scrapy.Request(url, self.CustomRequest)
+        yield SplashRequest(url, self.CustomRequest, cookies=self.new_cookies)
     #parsing level 1 categories
     # def parse(self, response):
-
+    # def handle_custom_request(self, response):
+    #     asyncio.ensure_future(self.CustomRequest(response))
         #to run different settings for different users
         # getting the instance settings from custom_settings_variable
         # instanceSetting = self.settings.get('CUSTOM_SETTINGS_VARIABLE')
@@ -209,10 +231,113 @@ class DataStoreSpider(scrapy.Spider):
         #             yield scrapy.Request(url= absolute_url,callback = self.CustomRequest, cookies = self.custom_cookies, headers = self.custom_headers, meta={'category_title': category_title, "category_image":category_image} )
 
         #  creating and sending request to individual categories          
-    def CustomRequest(self, response):
-        
+    async def CustomRequestAsync(self, response):
         print(response.url)
-        # print(response.body)
+                                                                  
+        #         name = specialty['name']
+        #         relative_url = specialty['href']
+                
+        #         # Construct the full URL by combining base URL and the relative path (href)
+        #         full_url = f"{self.base_url}{relative_url}"
+        #         print(full_url)
+
+    async def process_custom_request(self, response):
+        print("I am here")
+        result = await self.CustomRequestAsync(response)
+            
+        if 'specialties' in result:
+            specialties = result['specialties']
+                
+                # Iterate through each specialty
+            for specialty in specialties:
+                name = specialty['name']
+                relative_url = specialty['href']
+                    
+                    # Construct the full URL by combining base URL and the relative path (href)
+                full_url = f"{self.base_url}{relative_url}"
+                print(full_url)
+        # print(response.url)
+        # smart_scraper_graph = SmartScraperGraph(
+        # prompt= """
+        # Extract the names of all specialties and their respective 'href' attributes under the <ul> element with the attribute 'data-test-id="CommonSpecialties"' in the HTML.
+
+        # Instructions:
+        # 1. Locate the <ul> element with the 'data-test-id="CommonSpecialties"' attribute.
+        # 2. Inside this <ul> element, find all <li> elements and extract the <a> tag inside each <li>.
+        # 3. From each <a> tag, extract:
+        # - The text content as the exact name of the specialty (do not infer the name from the 'href' attribute).
+        # - The exact 'href' attribute **without modifying it** in any way.
+        # 4. Ensure that the 'href' value is extracted directly from the HTML and is not changed or reconstructed.
+        # 5. Do not add or replace any part of the `href` or infer any values for the name from the `href`.
+        # 6. Return the results as a list of dictionaries, where each dictionary contains:
+        # - 'name': the exact text content of the <a> tag (specialty name).
+        # - 'href': the original `href` value as it appears in the HTML.
+
+        # Example:
+        # If the specialty name is 'Cardiology', and the `href` is `/doctors/cardiologists`, return:
+        # {'name': 'Cardiology', 'href': '/doctors/cardiologists'}
+        # """,
+        # source="https://health.usnews.com/doctors",  # Pass the raw HTML here
+        # config=self.graph_config
+
+        #     )
+        # result = await smart_scraper_graph.run()
+        # print(result)
+        # if 'specialties' in result:
+        #     specialties = result['specialties']
+            
+        #     # Iterate through each specialty
+        #     for specialty in specialties:
+        #         name = specialty['name']
+        #         relative_url = specialty['href']
+                
+        #         # Construct the full URL by combining base URL and the relative path (href)
+        #         full_url = f"{self.base_url}{relative_url}"
+        #         print(full_url)
+        # smart_scraper_graph = SmartScraperGraph(
+        # prompt= """
+        # Extract the names of all specialties and their respective 'href' attributes under the <ul> element with the attribute 'data-test-id="CommonSpecialties"' in the HTML.
+
+        # Instructions:
+        # 1. Locate the <ul> element with the 'data-test-id="CommonSpecialties"' attribute.
+        # 2. Inside this <ul> element, find all <li> elements and extract the <a> tag inside each <li>.
+        # 3. From each <a> tag, extract:
+        # - The text content as the exact name of the specialty (do not infer the name from the 'href' attribute).
+        # - The exact 'href' attribute **without modifying it** in any way.
+        # 4. Ensure that the 'href' value is extracted directly from the HTML and is not changed or reconstructed.
+        # 5. Do not add or replace any part of the `href` or infer any values for the name from the `href`.
+        # 6. Return the results as a list of dictionaries, where each dictionary contains:
+        # - 'name': the exact text content of the <a> tag (specialty name).
+        # - 'href': the original `href` value as it appears in the HTML.
+
+        # Example:
+        # If the specialty name is 'Cardiology', and the `href` is `/doctors/cardiologists`, return:
+        # {'name': 'Cardiology', 'href': '/doctors/cardiologists'}
+        # """,
+        # source="https://health.usnews.com/doctors",  # Pass the raw HTML here
+        # config=self.graph_config
+
+        #     )
+        # result = smart_scraper_graph.run()
+        # print(result)
+        # if 'specialties' in result:
+        #     specialties = result['specialties']
+            
+        #     # Iterate through each specialty
+        #     for specialty in specialties:
+        #         name = specialty['name']
+        #         relative_url = specialty['href']
+                
+        #         # Construct the full URL by combining base URL and the relative path (href)
+        #         full_url = f"{self.base_url}{relative_url}"
+            
+        #     # Print the full URL and specialty name for debugging
+        #     # yield SplashRequest(full_url, arse_specialty_details)
+        #     # if specialty_page:
+        #     #     arse_specialty_details(name, full_url, specialty_page)
+
+        # else:
+        #     print("No specialties found in the result.")
         # api_url = "https://www.zara.com/ae/en/categories?"
         # # headers = {
         #     # "x-algolia-agent": "Algolia for vanilla JavaScript (lite) 3.27.0;instantsearch.js 2.10.3;JS Helper 2.26.0",
